@@ -1,0 +1,10 @@
+{
+  "path": "think-store",
+  "map": {
+    "theme": "theme",
+    "index.html": "index.html",
+    "intro.html": "intro.html",
+    "readme.md": "readme.md"
+  },
+  "exclude": ["**/*.map"]
+}

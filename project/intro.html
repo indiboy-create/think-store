@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>使用说明 - Think Store</title>
+<link rel="stylesheet" href="theme/layui/css/layui.css">
+<link rel="stylesheet" href="theme/css/index.css">
+</head>
+<body class="store-page">
+<header class="store-header">
+    <div class="layui-container store-header__inner">
+        <a class="store-brand" href="index.html">Think Store</a>
+        <ul class="layui-nav store-nav" lay-filter="store-nav">
+            <li class="layui-nav-item"><a href="index.html">发布包管理</a></li>
+            <li class="layui-nav-item layui-this"><a href="intro.html">使用说明</a></li>
+        </ul>
+    </div>
+</header>
+<main class="store-main">
+    <div class="layui-container">
+        <section class="store-hero">
+            <p class="store-eyebrow">youvision/think-store</p>
+            <h1 class="store-title">管理页如何工作</h1>
+            <p class="store-subtitle">管理页读取 youvision/think-store 的查询接口，并用数据表格展示已安装的发布包；同步操作调用同一扩展的静态资源同步接口。</p>
+        </section>
+        <div class="layui-tab layui-tab-brief store-tabs" lay-filter="intro-tabs">
+            <ul class="layui-tab-title">
+                <li class="layui-this">功能说明</li>
+                <li>部署流程</li>
+                <li>接口与配置</li>
+                <li>安全建议</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <ul class="store-list">
+                        <li><code>发布包</code>：包名与包内 <code>composer.json</code> 的描述。</li>
+                        <li><code>版本</code>：Composer 已安装版本。</li>
+                        <li><code>部署目标</code>：由包内 <code>project/project.json</code> 的 <code>path</code> 计算出的相对路径，例如 <code>public/store/store-example</code>。</li>
+                        <li><code>部署项</code>：<code>project.json</code> 中声明的部署条目数量。</li>
+                        <li><code>状态</code>：已同步、未同步或异常；异常时可查看具体错误。</li>
+                        <li><code>操作</code>：对单个包重新同步，或使用工具栏的“同步全部”批量处理。</li>
+                        <li><code>覆盖已有文件</code>：勾选时覆盖同名文件；取消勾选时只补齐缺失文件。</li>
+                    </ul>
+                </div>
+                <div class="layui-tab-item">
+                    <ol class="store-list store-list--ordered">
+                        <li>主项目执行 <code>composer require youvision/think-store</code>，并允许 <code>youvision/think-static</code> 插件。</li>
+                        <li>在 <code>composer.json</code> 的 <code>extra.think-static.project_dir</code> 中指向本包资源目录，用于部署管理页。</li>
+                        <li>执行 <code>composer dump-autoload</code>，think-static 会把管理页部署到 <code>public/store/think-store</code>。</li>
+                        <li>安装 <code>youvision/think-store-example</code> 等发布包后，在本页执行“同步全部”，把各包的静态资源部署到 <code>public/store/{path}</code>。</li>
+                        <li>访问 <code>/store/think-store/index.html</code> 打开本管理页。</li>
+                    </ol>
+                    <p class="store-note">主项目配置示例：</p>
+                    <pre class="store-pre"><code>{
+  "extra": {
+    "think-static": {
+      "project_dir": "vendor/youvision/think-store/project"
+    }
+  }
+}</code></pre>
+                    <p class="store-note">如果主项目自身也有 <code>project</code> 目录，两者不能同时使用同一个 <code>project_dir</code>。可保留主项目自动部署，改为手动调用 think-static 的 <code>StaticAssets</code> 部署管理页，或通过反向代理把管理页单独映射到 <code>public/store/think-store</code>。</p>
+                </div>
+                <div class="layui-tab-item">
+                    <ul class="store-list">
+                        <li><code>GET /store/packages</code>：查询已安装的 <code>youvision/think-store-*</code> 发布包。</li>
+                        <li><code>POST /store/packages/sync</code>：重新同步全部发布包；传入 <code>packages</code> 时只同步指定包。</li>
+                        <li><code>packages</code>：包名、逗号分隔的包名或包名数组，可选。</li>
+                        <li><code>force</code>：是否覆盖同名文件，可选；缺省使用 <code>config/store.php</code> 的 <code>force</code>。</li>
+                        <li><code>route.prefix</code>：默认 <code>store</code>。修改后需同步调整本页 <code>&lt;main data-api="/store"&gt;</code> 的属性值。</li>
+                        <li><code>prefix</code>：默认 <code>youvision/think-store-</code>，决定哪些 Composer 包会被识别为发布包。</li>
+                    </ul>
+                    <pre class="store-pre"><code># 查询
+curl http://127.0.0.1:8000/store/packages
+
+# 同步全部
+curl -X POST http://127.0.0.1:8000/store/packages/sync
+
+# 同步指定包
+curl -X POST http://127.0.0.1:8000/store/packages/sync \
+     -d "packages=youvision/think-store-example"</code></pre>
+                </div>
+                <div class="layui-tab-item">
+                    <ul class="store-list">
+                        <li>同步接口会写入 <code>public/store</code>，生产环境应通过中间件限制访问权限。</li>
+                        <li>建议只允许管理员或部署账号调用 <code>POST /store/packages/sync</code>。</li>
+                        <li>不要在公网环境暴露未鉴权的同步接口，避免静态资源被意外覆盖。</li>
+                        <li>修改 <code>project</code> 下的资源后，重新执行同步即可更新目标目录。</li>
+                        <li>发布包的 <code>project.json</code> 无效时不会中断其他包的同步，可在表格中查看错误详情。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <p class="store-actions">
+            <a class="layui-btn layui-btn-normal" href="index.html">返回发布包管理</a>
+        </p>
+    </div>
+</main>
+<footer class="store-footer">
+    <div class="layui-container store-footer__inner">
+        <span>youvision/think-store</span>
+        <span>MIT License</span>
+    </div>
+</footer>
+<script src="theme/layui/layui.js"></script>
+<script>
+layui.use(['element'], function () {});
+</script>
+</body>
+</html>

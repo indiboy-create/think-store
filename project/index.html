@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Think Store 发布包管理</title>
+<link rel="stylesheet" href="theme/layui/css/layui.css">
+<link rel="stylesheet" href="theme/css/index.css">
+</head>
+<body class="store-page">
+<header class="store-header">
+    <div class="layui-container store-header__inner">
+        <a class="store-brand" href="index.html">Think Store</a>
+        <ul class="layui-nav store-nav" lay-filter="store-nav">
+            <li class="layui-nav-item layui-this"><a href="index.html">发布包管理</a></li>
+            <li class="layui-nav-item"><a href="intro.html">使用说明</a></li>
+        </ul>
+    </div>
+</header>
+<main class="store-main" data-api="/store">
+    <div class="layui-container">
+        <section class="store-hero">
+            <p class="store-eyebrow">youvision/think-store</p>
+            <h1 class="store-title">发布包管理：查询与静态资源同步</h1>
+            <p class="store-subtitle">查看主项目中已安装的 youvision/think-store-* 发布包，确认部署目标，并按需重新同步静态资源。</p>
+            <p class="store-actions">
+                <a class="layui-btn layui-btn-primary" href="intro.html">查看使用说明</a>
+            </p>
+        </section>
+        <div class="store-toolbar layui-form" lay-filter="store-toolbar">
+            <div class="store-toolbar__summary" id="store-summary">正在加载发布包...</div>
+            <div class="store-toolbar__actions">
+                <input type="checkbox" name="force" lay-skin="primary" title="覆盖已有文件" checked>
+                <button class="layui-btn layui-btn-sm layui-btn-primary" id="refresh" type="button">刷新列表</button>
+                <button class="layui-btn layui-btn-sm layui-btn-normal" id="sync-all" type="button">同步全部</button>
+            </div>
+        </div>
+        <div class="store-table-card">
+            <table id="package-table" lay-filter="package-table"></table>
+        </div>
+        <p class="store-api-note">
+            接口前缀：<code id="store-api-base">/store</code>
+            · <code>GET /packages</code>
+            · <code>POST /packages/sync</code>
+        </p>
+    </div>
+</main>
+<footer class="store-footer">
+    <div class="layui-container store-footer__inner">
+        <span>youvision/think-store</span>
+        <span>MIT License</span>
+    </div>
+</footer>
+<script type="text/html" id="package-actions">
+{{# if (d.has_project && d.synced) { }}
+<a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="sync">重新同步</a>
+{{# } }}
+{{# if (d.has_project && !d.synced) { }}
+<a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="sync">同步</a>
+{{# } }}
+{{# if (!d.has_project) { }}
+<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="error">查看错误</a>
+{{# } }}
+</script>
+<script src="theme/layui/layui.js"></script>
+<script>
+layui.use(['table', 'form', 'layer', 'element'], function () {
+    var table = layui.table;
+    var form = layui.form;
+    var layer = layui.layer;
+    var main = document.querySelector('.store-main');
+    var api = ((main && main.getAttribute('data-api')) || '/store').replace(/\/+$/, '');
+    var summary = document.getElementById('store-summary');
+    var forceInput = document.querySelector('input[name="force"]');
+    var syncing = false;
+
+    document.getElementById('store-api-base').textContent = api;
+
+    var escapeHtml = function (value) {
+        return String(value === null || value === undefined ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
+    var renderSummary = function (list) {
+        var synced = 0;
+        var errors = 0;
+
+        list.forEach(function (item) {
+            if (!item.has_project) {
+                errors++;
+            } else if (item.synced) {
+                synced++;
+            }
+        });
+
+        summary.innerHTML = '共 <strong>' + list.length + '</strong> 个发布包 · 已同步 <strong>'
+            + synced + '</strong> 个 · 异常 <strong>' + errors + '</strong> 个';
+    };
+
+    table.render({
+        elem: '#package-table',
+        id: 'package-table',
+        url: api + '/packages',
+        method: 'get',
+        page: false,
+        even: true,
+        text: {
+            none: '暂无已安装的 think-store 发布包'
+        },
+        parseData: function (res) {
+            if (res && Array.isArray(res.packages)) {
+                return {
+                    code: 0,
+                    msg: '',
+                    count: res.total || res.packages.length,
+                    data: res.packages
+                };
+            }
+
+            return {
+                code: 1,
+                msg: (res && res.message) || '接口返回格式无效',
+                count: 0,
+                data: []
+            };
+        },
+        cols: [[
+            {
+                field: 'package',
+                title: '发布包',
+                minWidth: 320,
+                templet: function (d) {
+                    var description = d.description
+                        ? '<span class="store-package__desc">' + escapeHtml(d.description) + '</span>'
+                        : '';
+
+                    return '<span class="store-package__name">' + escapeHtml(d.package) + '</span>' + description;
+                }
+            },
+            {
+                field: 'version',
+                title: '版本',
+                width: 110,
+                align: 'center',
+                templet: function (d) {
+                    return d.version ? escapeHtml(d.version) : '<span class="store-text-muted">—</span>';
+                }
+            },
+            {
+                field: 'target',
+                title: '部署目标',
+                minWidth: 240,
+                templet: function (d) {
+                    return d.target
+                        ? '<code class="store-code">' + escapeHtml(d.target) + '</code>'
+                        : '<span class="store-text-muted">—</span>';
+                }
+            },
+            {
+                field: 'items',
+                title: '部署项',
+                width: 90,
+                align: 'center',
+                templet: function (d) {
+                    return d.has_project ? d.items : '<span class="store-text-muted">—</span>';
+                }
+            },
+            {
+                field: 'synced',
+                title: '状态',
+                width: 110,
+                align: 'center',
+                templet: function (d) {
+                    if (!d.has_project) {
+                        return '<span class="layui-badge layui-bg-red">异常</span>';
+                    }
+
+                    return d.synced
+                        ? '<span class="layui-badge layui-bg-green">已同步</span>'
+                        : '<span class="layui-badge layui-bg-orange">未同步</span>';
+                }
+            },
+            {
+                field: 'synced_at',
+                title: '更新时间',
+                width: 170,
+                templet: function (d) {
+                    return d.synced_at
+                        ? escapeHtml(d.synced_at)
+                        : '<span class="store-text-muted">—</span>';
+                }
+            },
+            {
+                title: '操作',
+                width: 140,
+                align: 'center',
+                toolbar: '#package-actions'
+            }
+        ]],
+        done: function (res) {
+            renderSummary(res.data || []);
+        },
+        error: function () {
+            summary.textContent = '接口请求失败，请确认路由前缀或服务状态';
+        }
+    });
+
+    form.render();
+
+    var sync = function (packages) {
+        if (syncing) {
+            return;
+        }
+
+        syncing = true;
+
+        var force = forceInput && forceInput.checked ? 'true' : 'false';
+        var body = 'force=' + force;
+
+        if (packages && packages.length) {
+            body = 'packages=' + encodeURIComponent(packages.join(',')) + '&' + body;
+        }
+
+        var loading = layer.load(1, { shade: [0.12, '#000'] });
+
+        fetch(api + '/packages/sync', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'Accept': 'application/json'
+            },
+            body: body
+        }).then(function (response) {
+            return response.json().then(function (data) {
+                return {
+                    ok: response.ok,
+                    status: response.status,
+                    data: data
+                };
+            });
+        }).then(function (result) {
+            if (!result.ok) {
+                throw new Error((result.data && result.data.message) || ('HTTP ' + result.status));
+            }
+
+            var copied = result.data.copied || 0;
+            var skipped = result.data.skipped || 0;
+            var errors = result.data.errors || 0;
+            var message = '同步完成：复制 ' + copied + ' 个文件，跳过 ' + skipped + ' 个';
+
+            if (errors > 0) {
+                message += '，' + errors + ' 个包失败';
+            }
+
+            layer.msg(message, {
+                icon: errors > 0 ? 2 : 1,
+                time: 2800
+            });
+
+            table.reload('package-table');
+        }).catch(function (error) {
+            layer.msg('同步失败：' + error.message, { icon: 2 });
+        }).finally(function () {
+            syncing = false;
+            layer.close(loading);
+        });
+    };
+
+    table.on('tool(package-table)', function (obj) {
+        if (obj.event === 'sync') {
+            sync([obj.data.package]);
+            return;
+        }
+
+        if (obj.event === 'error') {
+            layer.alert(escapeHtml(obj.data.error || '未知错误'), {
+                title: obj.data.package,
+                icon: 2
+            });
+        }
+    });
+
+    document.getElementById('sync-all').addEventListener('click', function () {
+        sync([]);
+    });
+
+    document.getElementById('refresh').addEventListener('click', function () {
+        table.reload('package-table');
+    });
+});
+</script>
+</body>
+</html>

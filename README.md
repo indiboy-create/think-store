@@ -1,315 +1,308 @@
-# think-store
+# youvision/think-store
 
-> **ThinkPHP 应用商店 —— 让优秀的扩展被看见，让每一次安装都值得信任。**
+ThinkPHP 8 商店管理扩展。依赖 [`youvision/think-static`](https://github.com/indiboy-create/think-static) 提供静态资源部署能力，用于管理主项目中已安装的 `youvision/think-store-*` 发布包（例如 `youvision/think-store-example`）。
 
-`PHP >= 8.0` · `ThinkPHP 8` · `Layui` · `MySQL 8` · `Composer`
+提供三项核心能力：
 
----
+- **查询**：列出已安装的 `think-store-*` 发布包及其版本、部署目标、同步状态。
+- **重新同步**：批量或按包重新部署各发布包 `project` 目录下的静态资源。
+- **管理首页**：内置 layui 数据表格页面，可视化查看发布包列表并执行同步操作。
 
-> **项目状态**：早期设计与初始化阶段。本文描述 think-store 的定位、能力边界与目标架构，具体接口、目录和命令以实际代码为准。
+## 环境要求
 
-## 这是什么
+- PHP >= 8.0
+- Composer >= 2.2
+- ThinkPHP 8 主项目
+- `youvision/think-static`（随本包自动安装）
 
-think-store 是一个基于 **ThinkPHP 8** 构建的应用商店，面向 ThinkPHP 生态提供应用发现、版本管理、兼容性校验与一键分发能力。
+## 安装
 
-它不只做一个“下载站”，而是想把散落在 GitHub、Packagist、论坛、网盘里的 ThinkPHP 组件、模块、主题和整站脚手架，收拢成一个**可搜索、可比较、可信任、可安装**的统一入口。
+```bash
+composer require youvision/think-store
+```
 
-一句话概括：
+`youvision/think-static` 是 Composer 插件，Composer 2.2 及以上版本默认拦截插件安装。主项目需要提前允许：
 
-> 像逛应用商店一样逛 ThinkPHP 生态。
+```json
+{
+    "config": {
+        "allow-plugins": {
+            "youvision/think-static": true
+        }
+    }
+}
+```
 
-## 为什么需要它
+ThinkPHP 8 项目通常在 `composer.json` 的 `post-autoload-dump` 中执行 `service:discover` 与 `vendor:publish`，安装后会自动完成服务注册与配置发布。若主项目未配置该脚本，请手动执行：
 
-ThinkPHP 生态并不缺优秀的扩展，缺的是一个稳定的“最后一公里”：
+```bash
+php think service:discover
+php think vendor:publish
+```
 
-- **入口分散**：包在 Packagist，说明在 GitHub，教程在论坛，下载在网盘。
-- **兼容性模糊**：是否支持 ThinkPHP 8？PHP 8.2 能不能跑？依赖会不会冲突？
-- **安装门槛高**：复制配置、改目录、建数据表、处理静态资源，每一步都可能劝退。
-- **质量参差**：缺少统一的审核、评分、维护状态和版本记录。
+### 部署管理首页
 
-think-store 试图把这些问题收敛成三件事：
+`project` 目录是管理首页的静态资源，部署目标为 `public/store/think-store`。在主项目 `composer.json` 中把 think-static 的资源目录指向本包：
 
-1. **聚合**：统一收录应用、版本、分类、标签与作者信息。
-2. **验证**：展示 PHP / ThinkPHP 版本矩阵、依赖树、安全审计与维护状态。
-3. **分发**：给出一行安装命令，或直接生成可部署的应用包。
+```json
+{
+    "extra": {
+        "think-static": {
+            "project_dir": "vendor/youvision/think-store/project"
+        }
+    }
+}
+```
 
-## 核心能力
-
-| 模块 | 能力 |
-| --- | --- |
-| 应用市场 | 首页推荐、分类导航、排行榜、关键词搜索、标签筛选、应用详情 |
-| 版本中心 | 版本历史、更新日志、依赖树、PHP / ThinkPHP 兼容矩阵 |
-| 开发者中心 | 应用上架、版本发布、元数据同步、下载与评分统计 |
-| 管理中心 | 应用审核、分类与标签维护、推荐位、敏感词、操作日志 |
-| 开放接口 | RESTful API、Webhook 同步、CLI 命令 |
-| 多站点 | 基于 ThinkPHP 多应用模式，按站点、栏目、内容隔离数据 |
-
-### 支持的应用类型
-
-| 类型 | 说明 | 典型形态 |
-| --- | --- | --- |
-| `component` | 可复用的 Composer 组件 | 身份认证、支付、存储、二维码 |
-| `module` | 可直接挂载的多应用模块 | 商城、CMS、工单、会员中心 |
-| `theme` | 前台模板与静态资源包 | 企业站、博客、门户主题 |
-| `skeleton` | 整站脚手架 | 后台管理系统、SaaS 起始项目 |
-| `tool` | 开发与运维工具 | CLI 扩展、代码生成器、部署脚本 |
-
-## 技术架构
+执行 `composer dump-autoload` 后访问：
 
 ```text
-┌─────────────────────────────────────────────┐
-│                  接入层                      │
-│   Web 门户  ·  开发者中心  ·  管理后台  ·  API │
-└─────────────────────┬───────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────┐
-│              ThinkPHP 8 多应用层             │
-│  portal  ·  developer  ·  admin  ·  api     │
-└─────────────────────┬───────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────┐
-│                领域服务层                    │
-│  应用  ·  版本  ·  分类  ·  审核  ·  统计     │
-└─────────────────────┬───────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────┐
-│              基础设施与数据层                │
-│  Model / MySQL  ·  Cache  ·  Queue  ·  Sync  │
-└─────────────────────────────────────────────┘
+/store/think-store/index.html
 ```
 
-- **后端**：ThinkPHP 8，遵循多应用模式，模块边界清晰。
-- **数据**：优先使用 Model（ORM）组织查询，表名统一使用英文复数。
-- **前端**：Layui，静态资源统一放在 `public/static/ui/{library}`。
-- **同步**：从 Packagist / GitHub 拉取元数据，支持定时任务与 Webhook。
-- **部署**：应用包统一落到可配置的 `dist_path`，不硬编码路径。
+管理首页使用 layui 数据表格展示已安装发布包，支持单包同步与批量同步。若主项目自身也有 `project` 目录，两者不能同时使用同一个 `project_dir`，可改为手动调用 think-static 完成管理页部署。
 
-## 快速开始
+## 发布包识别规则
 
-### 环境要求
+满足以下条件的 Composer 包会被识别为商店发布包：
 
-- PHP >= 8.0（推荐 8.2）
-- Composer 2.x
-- MySQL >= 5.7（推荐 8.0）或 PostgreSQL
-- 可选的 Redis，用于缓存与队列
+1. 包名以配置项 `prefix` 开头，默认 `youvision/think-store-`；
+2. 不在配置项 `exclude` 排除列表中（支持 `*`、`?` 通配符）；
+3. 包已安装且存在安装目录。
 
-### 安装
+`youvision/think-store` 自身不以 `youvision/think-store-` 开头，因此不会被列入包列表。每个发布包通过包内 `project/project.json` 声明静态资源部署方式，规则与 `youvision/think-static` 完全一致。
+
+## 查询接口
+
+```http
+GET /store/packages
+```
+
+响应示例：
+
+```json
+{
+  "total": 1,
+  "packages": [
+    {
+      "package": "youvision/think-store-example",
+      "version": "1.1.0",
+      "description": "ThinkPHP 8 静态站点实例包",
+      "path": "D:/project/vendor/youvision/think-store-example",
+      "target": "public/store/store-example",
+      "items": 8,
+      "has_project": true,
+      "synced": true,
+      "synced_at": "2026-11-10 12:00:00",
+      "error": ""
+    }
+  ]
+}
+```
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `package` | string | Composer 包名 |
+| `version` | string | 已安装版本 |
+| `description` | string | 包内 `composer.json` 的 `description` |
+| `path` | string | 包安装目录绝对路径 |
+| `target` | string | 静态资源部署目标，相对主项目根目录；无法解析时为空字符串 |
+| `items` | int | `project.json` 中声明的部署项数量 |
+| `has_project` | bool | `project/project.json` 是否有效 |
+| `synced` | bool | 目标目录是否已存在 |
+| `synced_at` | string | 目标目录最后更新时间；未同步时为空字符串 |
+| `error` | string | 解析失败原因；正常时为空字符串 |
+
+单个包的 `project.json` 无效时不会中断列表查询，错误会写入该包的 `error` 字段。
+
+## 同步接口
+
+```http
+POST /store/packages/sync
+```
+
+请求参数：
+
+| 参数 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `packages` | string / array | 否 | 包名、逗号分隔的包名或包名数组；省略时同步全部已识别发布包 |
+| `force` | bool | 否 | 是否覆盖已存在的同名文件；省略时使用配置项 `force` |
 
 ```bash
-git clone https://github.com/indiboy-create/think-store.git
-cd think-store
+# 同步全部发布包
+curl -X POST http://127.0.0.1:8000/store/packages/sync
 
-composer install
+# 同步指定包
+curl -X POST http://127.0.0.1:8000/store/packages/sync \
+    -d "packages=youvision/think-store-example"
 
-cp .env.example .env
-# 编辑 .env，配置数据库连接与应用地址
-
-php think migrate:run
-php think store:apps:sync
+# 只补齐缺失文件，不覆盖已有文件
+curl -X POST http://127.0.0.1:8000/store/packages/sync \
+    -d "packages=youvision/think-store-example" \
+    -d "force=false"
 ```
 
-### 启动
+响应示例：
 
-```bash
-php think run
+```json
+{
+  "packages": [
+    {
+      "package": "youvision/think-store-example",
+      "target": "public/store/store-example",
+      "items": {
+        "theme": {
+          "target": "public/store/store-example/theme",
+          "copied": 8,
+          "skipped": 0,
+          "failed": 0
+        }
+      },
+      "copied": 9,
+      "skipped": 0,
+      "failed": 0,
+      "success": true,
+      "error": ""
+    }
+  ],
+  "total": 1,
+  "copied": 9,
+  "skipped": 0,
+  "failed": 0,
+  "errors": 0,
+  "force": true
+}
 ```
 
-浏览器访问 `http://127.0.0.1:8000`，即可进入应用市场首页。
+| 字段 | 说明 |
+| --- | --- |
+| `packages` | 每个包的部署明细，包含 `target`、`items`、`copied`、`skipped`、`failed`、`success`、`error` |
+| `total` | 本次处理的包数量 |
+| `copied` | 成功复制的文件总数 |
+| `skipped` | 因已存在而跳过的文件总数 |
+| `failed` | 复制失败的文件总数 |
+| `errors` | 部署失败的包数量 |
+| `force` | 本次是否覆盖同名文件 |
+
+单个包部署失败不会中断其他包，失败原因记录在该包的 `error` 字段。请求的包未安装或不受管理时返回 HTTP 400：
+
+```json
+{
+  "message": "未安装或不受管理的 think-store 发布包：youvision/think-store-unknown"
+}
+```
+
+## PHP 调用
+
+服务注册后，可通过容器获取 `Store`：
+
+```php
+use Youvision\ThinkStore\Store;
+
+/** @var Store $store */
+$store = app(Store::class);
+// 也可使用别名：app('store')
+
+// 查询已安装的发布包
+$packages = $store->packages();
+
+// 同步全部发布包
+$result = $store->sync();
+
+// 同步指定包
+$result = $store->sync('youvision/think-store-example');
+$result = $store->sync(['youvision/think-store-example']);
+
+// 指定包，且只补齐缺失文件
+$result = $store->sync('youvision/think-store-example', false);
+```
+
+`Store` 构造函数同样支持脱离容器使用：
+
+```php
+$store = new Store((array) config('store'), app()->getRootPath());
+```
+
+## 配置 config/store.php
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `route.enabled` | `true` | 是否自动注册查询与同步接口；关闭后可自行定义路由 |
+| `route.prefix` | `store` | 路由前缀，留空表示不添加前缀；接口地址为 `/{prefix}/packages`、`/{prefix}/packages/sync` |
+| `route.middleware` | `[]` | 应用到路由上的中间件，可填写类名或别名 |
+| `prefix` | `youvision/think-store-` | 发布包包名前缀，只有匹配该前缀的包才会被识别 |
+| `exclude` | `[]` | 需要排除的包名，支持 `*`、`?` 通配符 |
+| `root` | `public/store` | 静态资源部署根目录，相对主项目根目录；主项目 `extra.think-static.root` 优先 |
+| `project_dir` | `project` | 发布包内的资源目录，相对各包安装目录 |
+| `manifest` | `project.json` | 资源目录内的部署配置文件名；主项目 `extra.think-static.manifest` 优先 |
+| `force` | `true` | 重新同步时是否覆盖已存在的同名文件 |
+| `skip_dot_files` | `true` | 是否跳过以点开头的隐藏文件；主项目 `extra.think-static.skip_dot_files` 优先 |
+
+`Service` 会自动合并包内默认配置与主项目配置。主项目可通过 `php think vendor:publish` 发布配置文件后修改，也可直接在 `config/store.php` 中覆盖；修改后清除 `runtime` 缓存即可生效。
+
+## 与 think-static 的关系
+
+- `think-static` 在 Composer 安装、更新或执行 `composer dump-autoload` 时，自动部署主项目自身的 `project` 目录。
+- 本包自身的 `project` 目录同样由 think-static 部署；需要在主项目 `extra.think-static.project_dir` 中指向 `vendor/youvision/think-store/project`。
+- `think-store` 不参与 Composer 自动部署，只在调用 `sync()` 或同步接口时，逐个扫描并部署已安装的 `think-store-*` 发布包。
+- 部署根目录、配置文件名和隐藏文件策略优先沿用主项目 `composer.json` 中的 `extra.think-static`，避免两套配置不一致：
+
+```json
+{
+    "extra": {
+        "think-static": {
+            "root": "public/store",
+            "manifest": "project.json",
+            "skip_dot_files": true
+        }
+    }
+}
+```
+
+- `project_dir` 由 `config/store.php` 独立控制，因为它相对每个发布包的安装目录，而不是主项目根目录。
+- 每个包最终的部署位置为 `{root}/{project.json 中的 path}`，例如 `public/store/store-example`。
 
 ## 目录结构
 
 ```text
 think-store/
-├─ app/
-│  ├─ admin/              # 管理后台
-│  ├─ api/                # 开放接口
-│  ├─ common/             # 公共模型、服务与门面
-│  ├─ developer/          # 开发者中心
-│  └─ portal/             # 应用市场门户
-├─ config/
-│  └─ store.php           # 商店配置
-├─ public/
-│  ├─ index.php
-│  └─ static/
-│     ├─ dist/            # 应用包部署目录（可配置）
-│     └─ ui/
-│        └─ layui/        # 前端组件库
-├─ route/
-│  └─ app.php
 ├─ composer.json
+├─ config/
+│  └─ store.php              # 商店配置
+├─ route/
+│  └─ store.php              # 查询与同步路由
+├─ src/
+│  ├─ Service.php            # ThinkPHP 服务注册
+│  ├─ Store.php              # 包查询与静态资源同步
+│  └─ StoreController.php    # HTTP 接口
+├─ project/
+│  ├─ project.json           # 管理页部署配置
+│  ├─ index.html             # 发布包管理首页（layui 数据表格）
+│  ├─ intro.html             # 使用说明
+│  ├─ readme.md
+│  └─ theme/
+│     ├─ css/index.css       # 管理页自定义样式
+│     └─ layui/              # layui 框架资源
+├─ tests/
+│  └─ verify.php
+├─ LICENSE
 └─ README.md
 ```
 
-## 配置说明
-
-核心配置位于 `config/store.php`，所有路径与开关均可在部署时覆盖：
-
-```php
-<?php
-
-return [
-    // 商店基础信息
-    'site_name' => 'ThinkPHP 应用商店',
-    'site_url'  => 'https://store.example.com',
-    'site_logo' => '/static/ui/store/logo.svg',
-
-    // 应用包部署根目录，相对 public，支持自定义，避免硬编码
-    'dist_path' => 'static/dist',
-
-    // 元数据同步
-    'sync' => [
-        'driver'   => 'packagist',      // 数据源驱动：packagist / github / local
-        'endpoint' => 'https://packagist.org',
-        'token'    => '',               // 私有源或提高限额时使用
-        'timeout'  => 15,               // 单次请求超时时间（秒）
-        'interval' => 3600,             // 自动同步间隔（秒），0 表示关闭
-    ],
-
-    // 应用包上传
-    'upload' => [
-        'max_size'  => 20971520,        // 单个应用包最大体积（字节），默认 20MB
-        'allow_ext' => ['zip', 'tar', 'gz'],
-        'path'      => 'static/uploads',// 上传文件存放目录，相对 public
-    ],
-
-    // 缓存
-    'cache' => [
-        'store' => 'file',              // 缓存驱动：file / redis
-        'ttl'   => 300,                 // 列表与详情缓存时间（秒）
-    ],
-
-    // 应用审核
-    'review' => [
-        'auto'      => false,           // 是否开启自动审核
-        'sensitive' => [],              // 敏感词列表
-    ],
-
-    // 多站点数据隔离
-    'multi_site' => [
-        'enable'     => true,           // 是否启用多站点模式
-        'default_id' => 1,              // 默认站点 ID
-    ],
-];
-```
-
-## 命令行
+## 验证
 
 ```bash
-# 同步应用元数据（全部或指定包）
-php think store:apps:sync
-php think store:apps:sync --package=indiboy/think-example
-
-# 审核应用
-php think store:apps:review
-
-# 生成下载与评分统计
-php think store:apps:stats
-
-# 安装指定应用到本地项目
-php think store:install indiboy/think-example
-
-# 检查依赖安全与版本兼容性
-php think store:apps:audit
+composer test
 ```
 
-## 开放接口
+或直接运行：
 
-| 方法 | 路径 | 说明 |
-| --- | --- | --- |
-| `GET` | `/api/apps` | 应用列表，支持分类、标签、关键词与排序 |
-| `GET` | `/api/apps/{name}` | 应用详情 |
-| `GET` | `/api/apps/{name}/versions` | 版本历史与兼容信息 |
-| `GET` | `/api/categories` | 分类树 |
-| `GET` | `/api/tags` | 标签列表 |
-| `GET` | `/api/rankings` | 下载榜、评分榜、更新榜 |
-| `POST` | `/api/webhooks/packagist` | 接收 Packagist 更新事件 |
-
-接口统一返回 JSON，字段使用英文小写下划线命名，例如 `package_name`、`thinkphp_version`、`download_count`。
-
-## 应用包规范
-
-每个应用通过根目录的 `manifest.json` 描述自身能力与边界：
-
-```json
-{
-  "name": "indiboy/think-example",
-  "title": "示例应用",
-  "type": "module",
-  "version": "1.0.0",
-  "description": "一句话描述应用能力",
-  "php": ">=8.0",
-  "thinkphp": "^8.0",
-  "dependencies": {},
-  "permissions": ["database", "cache"],
-  "author": {
-    "name": "indiboy",
-    "homepage": "https://github.com/indiboy-create"
-  }
-}
+```bash
+php tests/verify.php
 ```
 
-字段约定：
-
-- `name`：Composer 包名，全小写加连字符；
-- `type`：应用类型，取值见上文；
-- `php` / `thinkphp`：兼容版本约束；
-- `permissions`：应用运行所需的系统能力，安装前向用户明示。
-
-## 数据模型
-
-| 表 | 说明 |
-| --- | --- |
-| `apps` | 应用主表，记录包名、标题、类型、作者与状态 |
-| `app_versions` | 版本表，记录版本号、更新时间、依赖与兼容范围 |
-| `categories` | 分类表，支持树形结构 |
-| `tags` | 标签表 |
-| `developers` | 开发者与团队信息 |
-| `downloads` | 下载记录，用于统计与趋势分析 |
-| `reviews` | 评分与评论 |
-| `sites` | 站点表，用于多应用模式下的数据隔离 |
-
-### 应用生命周期
-
-```text
-draft → pending → published → offline → archived
-```
-
-- `draft`：开发者草稿；
-- `pending`：等待审核；
-- `published`：已上架，可被搜索与安装；
-- `offline`：主动下架，保留历史数据；
-- `archived`：归档，不再接收新版本。
-
-## 设计原则
-
-- **配置优先**：路径、数据源、缓存、审核策略全部可配置。
-- **显式兼容**：版本兼容信息必须可查，不做模糊承诺。
-- **最小依赖**：保持安装包精简，只引入必要组件。
-- **数据隔离**：多站点场景下，站点、栏目、内容各归其位。
-- **可审计**：上架、审核、下架、安装都有记录。
-
-## 路线图
-
-- [x] 项目定位与信息架构设计
-- [ ] 应用与版本数据模型
-- [ ] 门户首页、分类与搜索
-- [ ] 应用详情与版本兼容矩阵
-- [ ] 开发者中心与上架流程
-- [ ] 管理后台与审核流
-- [ ] RESTful API 与 Webhook 同步
-- [ ] CLI 安装与安全审计
-- [ ] 多站点数据隔离
-- [ ] 静态化与 SEO 优化
-
-## 参与贡献
-
-欢迎提交 Issue 与 Pull Request。参与前请先确认：
-
-1. 代码风格与现有模块保持一致；
-2. 新增配置项需附带完整的中文说明；
-3. 数据表、路由与命令命名使用英文复数；
-4. 提交前确保相关检查通过。
+验证脚本会检查 `composer.json` 的依赖、服务注册与配置声明，校验默认配置、路由与服务源码，校验管理页的 `project.json`、layui 数据表格与接口调用，并在临时目录中模拟主项目与多个 `think-store-*` 包，覆盖包识别、排除规则、损坏包容错、目标目录计算、全量与指定包同步、`force` 行为、主项目部署根目录覆盖以及管理页自身部署等场景。
 
 ## 许可证
 
-本项目采用 MIT 许可证，详见后续补充的 `LICENSE` 文件。
+MIT，详见 `LICENSE`。

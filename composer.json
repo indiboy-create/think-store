@@ -1,0 +1,48 @@
+{
+    "name": "youvision/think-store",
+    "description": "ThinkPHP 8 商店扩展：查询已安装的 think-store-* 发布包，并通过 youvision/think-static 重新同步静态资源。",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "thinkphp",
+        "thinkphp8",
+        "store",
+        "static",
+        "assets",
+        "publish"
+    ],
+    "authors": [
+        {
+            "name": "youvision"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "topthink/framework": "^8.0",
+        "youvision/think-static": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Youvision\\ThinkStore\\": "src/"
+        }
+    },
+    "extra": {
+        "think": {
+            "services": [
+                "Youvision\\ThinkStore\\Service"
+            ],
+            "config": {
+                "store": "config/store.php"
+            }
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "@php tests/verify.php"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
