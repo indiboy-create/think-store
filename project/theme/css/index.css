@@ -324,6 +324,16 @@
     gap: 12px;
 }
 
+.store-version {
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #eef5ff;
+    color: var(--store-accent-dark);
+    font-size: 12px;
+    font-weight: 600;
+}
+
 @media (max-width: 768px) {
     .store-header__inner {
         flex-direction: column;

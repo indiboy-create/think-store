@@ -1,5 +1,6 @@
 {
   "path": "think-store",
+  "version": "1.0.0",
   "map": {
     "theme": "theme",
     "index.html": "index.html",

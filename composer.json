@@ -1,6 +1,7 @@
 {
     "name": "youvision/think-store",
     "description": "ThinkPHP 8 商店扩展：查询已安装的 think-store-* 发布包，并通过 youvision/think-static 重新同步静态资源。",
+    "version": "1.0.0",
     "type": "library",
     "license": "MIT",
     "keywords": [

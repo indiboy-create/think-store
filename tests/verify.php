@@ -53,6 +53,11 @@ $check(is_array($composer), 'composer.json 应为有效 JSON');
 $check(($composer['name'] ?? '') === 'youvision/think-store', '包名应为 youvision/think-store');
 $check(($composer['type'] ?? '') === 'library', 'composer.json 的 type 应为 library');
 $check(
+    is_string($composer['version'] ?? null)
+    && preg_match('/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/', $composer['version']) === 1,
+    'composer.json 应声明合法的 version 字段'
+);
+$check(
     ($composer['require']['youvision/think-static'] ?? '') === '^1.0',
     'composer.json 应依赖 youvision/think-static ^1.0'
 );
@@ -118,6 +123,10 @@ $manifest     = json_decode((string) file_get_contents($manifestFile), true);
 $check(is_array($manifest), 'project/project.json 应为有效 JSON');
 $check(($manifest['path'] ?? '') === 'think-store', 'project.json 的 path 应为 think-store');
 $check(
+    ($manifest['version'] ?? '') === ($composer['version'] ?? null),
+    'project.json 的 version 应与 composer.json 一致'
+);
+$check(
     ($manifest['map'] ?? []) === [
         'theme'      => 'theme',
         'index.html' => 'index.html',
@@ -145,6 +154,17 @@ $introSource = (string) file_get_contents($packageRoot . '/project/intro.html');
 $check(str_contains($introSource, '使用说明'), '使用说明页应存在');
 $check(str_contains($introSource, '/store/packages/sync'), '使用说明页应描述同步接口');
 $check(str_contains($introSource, 'extra.think-static.project_dir'), '使用说明页应描述部署配置');
+
+$version = (string) ($composer['version'] ?? '');
+
+$check(
+    str_contains($indexSource, 'v' . $version),
+    '管理首页页脚应显示与 composer.json 一致的版本号'
+);
+$check(
+    str_contains($introSource, 'v' . $version),
+    '使用说明页页脚应显示与 composer.json 一致的版本号'
+);
 
 $routeSource = (string) file_get_contents($packageRoot . '/route/store.php');
 
