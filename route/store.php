@@ -18,9 +18,5 @@ $register = static function (): void {
         ->name('store.asset');
 };
 
-if ($prefix === '') {
-    $register();
-} else {
-    $group = Route::group($prefix, $register);
-    $group->middleware($middleware);
-}
+$group = Route::group($prefix, $register);
+$group->middleware($middleware);

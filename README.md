@@ -47,7 +47,7 @@ php think vendor:publish
 
 ## 页面与静态资源
 
-- 模板位于包内 `theme/view`，由 think-view 的 `Think` 驱动直接渲染，不需要复制到主项目。
+- 模板位于包内 `theme/view`，由包内 `View` 渲染器通过 think-view 的 `Think` 驱动渲染，不需要复制到主项目。
 - 静态资源由 `AssetController` 读取 `theme/assets` 后输出，路径经过 `realpath` 校验并拒绝 `..`，避免目录穿越。
 - 资源响应带 `Cache-Control: public, max-age=86400`，字体、CSS、JS、图片等类型会返回对应的 `Content-Type`。
 
@@ -158,6 +158,7 @@ think-store/
 ├─ src/
 │  ├─ Service.php            # ThinkPHP 服务注册
 │  ├─ Store.php              # 发布包查询
+│  ├─ View.php               # 包内模板渲染器
 │  ├─ StoreController.php    # 页面渲染与查询接口
 │  └─ AssetController.php    # 包内静态资源输出
 ├─ theme/
@@ -185,7 +186,7 @@ composer test
 php tests/verify.php
 ```
 
-验证脚本会检查 `composer.json` 的依赖与服务注册、默认配置、路由与控制器源码、think-view 模板、assets 路由与目录穿越防护，并在临时目录中模拟主项目与多个 `think-store-*` 包，覆盖包识别、排序、排除规则、通配符匹配、自定义前缀与失效 `composer.json` 的容错场景。
+验证脚本会检查 `composer.json` 的依赖与服务注册、默认配置、路由、控制器与渲染器源码、think-view 模板、assets 路由与目录穿越防护，并在临时目录中模拟主项目与多个 `think-store-*` 包，覆盖包识别、排序、排除规则、通配符匹配、自定义前缀与失效 `composer.json` 的容错场景。
 
 ## 许可证
 

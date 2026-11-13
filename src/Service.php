@@ -20,6 +20,8 @@ class Service extends ThinkService
         });
 
         $this->app->bind(Store::class, 'store');
+
+        $this->app->instance(View::class, new View($this->app));
     }
 
     public function boot(): void

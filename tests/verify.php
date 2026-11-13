@@ -73,6 +73,7 @@ foreach (['root', 'project_dir', 'manifest', 'force', 'skip_dot_files'] as $key)
 
 foreach ([
     'src/Store.php',
+    'src/View.php',
     'src/StoreController.php',
     'src/AssetController.php',
     'src/Service.php',
@@ -148,6 +149,8 @@ $check(str_contains($routeSource, "Route::get('assets/<path>'"), '路由应注�
 $check(str_contains($routeSource, 'AssetController'), '资源路由应使用 AssetController');
 $check(str_contains($routeSource, "pattern(['path' => '.*'])"), '资源路由应匹配多级路径');
 $check(str_contains($routeSource, 'middleware($middleware)'), '路由应应用中间件配置');
+$check(str_contains($routeSource, 'Route::group($prefix, $register)'), '路由应统一按前缀分组注册');
+$check(!str_contains($routeSource, "if (\$prefix === '')"), '空前缀时也应走分组并应用中间件');
 $check(!str_contains($routeSource, 'packages/sync'), '路由不应注册同步接口');
 
 if (!class_exists(\Youvision\ThinkStore\AssetController::class)) {
@@ -168,20 +171,29 @@ $serviceSource = (string) file_get_contents($packageRoot . '/src/Service.php');
 
 $check(str_contains($serviceSource, 'loadRoutesFrom'), '服务应在 boot 阶段加载路由');
 $check(str_contains($serviceSource, "bind('store'"), '服务应绑定 store 容器');
+$check(str_contains($serviceSource, 'instance(View::class'), '服务应注册视图渲染器');
 $check(str_contains($serviceSource, 'getRootPath'), '服务应使用主项目根目录');
 
 $controllerSource = (string) file_get_contents($packageRoot . '/src/StoreController.php');
 
-$check(str_contains($controllerSource, 'use think\\view\\driver\\Think'), '控制器应使用 think-view 模板驱动');
 $check(str_contains($controllerSource, 'function index'), '控制器应提供 index 页面');
 $check(str_contains($controllerSource, 'function intro'), '控制器应提供 intro 页面');
 $check(str_contains($controllerSource, 'function packages'), '控制器应提供 packages 接口');
-$check(str_contains($controllerSource, 'view_path'), '控制器应指定模板目录');
-$check(str_contains($controllerSource, 'fetch($template'), '控制器应渲染模板');
-$check(str_contains($controllerSource, 'ob_start'), '控制器应捕获模板输出');
+$check(str_contains($controllerSource, 'View $view'), '控制器应注入包内渲染器');
+$check(str_contains($controllerSource, '$this->view->render'), '控制器应通过渲染器输出页面');
 $check(str_contains($controllerSource, 'InstalledVersions'), '控制器应从 Composer 运行时读取版本');
 $check(str_contains($controllerSource, "'dev'"), '控制器应提供开发版本回退');
 $check(str_contains($controllerSource, 'function sync') === false, '控制器不应提供 sync 接口');
+
+$viewSource = (string) file_get_contents($packageRoot . '/src/View.php');
+
+$check(str_contains($viewSource, 'use think\\view\\driver\\Think'), '渲染器应使用 think-view 模板驱动');
+$check(str_contains($viewSource, "'view_path'"), '渲染器应指定模板目录');
+$check(str_contains($viewSource, '/theme/view/'), '渲染器应指向包内 theme/view 目录');
+$check(str_contains($viewSource, 'cache_path'), '渲染器应配置模板缓存目录');
+$check(str_contains($viewSource, 'getRuntimePath'), '渲染器应使用主项目运行时目录');
+$check(str_contains($viewSource, 'cache_prefix'), '渲染器应使用独立的模板缓存前缀');
+$check(str_contains($viewSource, 'ob_start'), '渲染器应捕获模板输出');
 
 $storeSource = (string) file_get_contents($packageRoot . '/src/Store.php');
 

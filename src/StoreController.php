@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Youvision\ThinkStore;
 
-use think\App;
 use think\response\Json;
-use think\view\driver\Think;
 
 class StoreController
 {
-    public function __construct(protected Store $store, protected App $app)
+    public function __construct(protected Store $store, protected View $view)
     {
     }
 
@@ -45,19 +43,10 @@ class StoreController
 
     protected function render(string $template): string
     {
-        $driver = new Think($this->app, [
-            'view_path'   => dirname(__DIR__) . '/theme/view/',
-            'view_suffix' => 'html',
-        ]);
-
-        ob_start();
-
-        $driver->fetch($template, [
+        return $this->view->render($template, [
             'api'     => $this->apiPrefix(),
             'version' => $this->version(),
         ]);
-
-        return (string) ob_get_clean();
     }
 
     protected function apiPrefix(): string
