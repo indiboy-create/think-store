@@ -69,14 +69,26 @@ class StoreController
 
     protected function version(): string
     {
+        if (class_exists(\Composer\InstalledVersions::class)) {
+            try {
+                $version = \Composer\InstalledVersions::getPrettyVersion('youvision/think-store');
+
+                if (is_string($version) && $version !== '') {
+                    return $version;
+                }
+            } catch (\Throwable) {
+            }
+        }
+
         $file = dirname(__DIR__) . '/composer.json';
 
         if (!is_file($file)) {
-            return '';
+            return 'dev';
         }
 
-        $json = json_decode((string) file_get_contents($file), true);
+        $json    = json_decode((string) file_get_contents($file), true);
+        $version = is_array($json) ? (string) ($json['version'] ?? '') : '';
 
-        return is_array($json) ? (string) ($json['version'] ?? '') : '';
+        return $version !== '' ? $version : 'dev';
     }
 }

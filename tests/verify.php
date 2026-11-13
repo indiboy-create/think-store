@@ -27,11 +27,7 @@ $check(is_array($composer), 'composer.json 应为有效 JSON');
 $check(($composer['name'] ?? '') === 'youvision/think-store', '包名应为 youvision/think-store');
 $check(($composer['type'] ?? '') === 'library', 'composer.json 的 type 应为 library');
 $check(
-    is_string($composer['version'] ?? null)
-    && preg_match('/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/', $composer['version']) === 1,
-    'composer.json 应声明合法的 version 字段'
-);
-$check(
+
     ($composer['require']['topthink/framework'] ?? '') === '^8.0',
     'composer.json 应依赖 topthink/framework ^8.0'
 );
@@ -84,7 +80,7 @@ foreach ([
     'config/store.php',
     'theme/view/index.html',
     'theme/view/intro.html',
-    'theme/readme.md',
+
     'theme/assets/css/index.css',
     'theme/assets/js/store.js',
     'theme/assets/layui/layui.js',
@@ -108,7 +104,7 @@ $check(str_contains($indexSource, '{$api}/assets/layui/layui.js'), '管理首页
 $check(str_contains($indexSource, '{$api}/assets/js/store.js'), '管理首页模板应引用页面脚本');
 $check(str_contains($indexSource, 'window.STORE_CONFIG'), '管理首页模板应注入接口配置');
 $check(str_contains($indexSource, '{$api}/think-store/intro'), '管理首页模板应链接使用说明路由');
-$check(str_contains($indexSource, 'v{$version}'), '管理首页模板应使用视图变量输出版本号');
+$check(str_contains($indexSource, '{$version}'), '管理首页模板应使用视图变量输出版本号');
 $check(str_contains($indexSource, 'class="st-hero"'), '管理首页模板应包含 hero 区域');
 $check(!str_contains($indexSource, '/packages/sync'), '管理首页模板不应包含同步接口调用');
 $check(!str_contains($indexSource, 'cdn'), '管理首页模板不应使用 CDN 资源');
@@ -130,7 +126,7 @@ $check(str_contains($introSource, '/store/think-store'), '使用说明模板应�
 $check(str_contains($introSource, '/store/assets/'), '使用说明模板应描述 assets 路由');
 $check(str_contains($introSource, '{$api}/assets/layui/css/layui.css'), '使用说明模板应引用 assets 路由的 layui 样式');
 $check(str_contains($introSource, '{$api}/assets/js/store.js'), '使用说明模板应引用页面脚本');
-$check(str_contains($introSource, 'v{$version}'), '使用说明模板应使用视图变量输出版本号');
+$check(str_contains($introSource, '{$version}'), '使用说明模板应使用视图变量输出版本号');
 $check(str_contains($introSource, 'class="st-config"'), '使用说明模板应包含配置说明');
 $check(!str_contains($introSource, 'packages/sync'), '使用说明模板不应描述同步接口');
 
@@ -182,6 +178,8 @@ $check(str_contains($controllerSource, 'function packages'), '控制器应提供
 $check(str_contains($controllerSource, 'view_path'), '控制器应指定模板目录');
 $check(str_contains($controllerSource, 'fetch($template'), '控制器应渲染模板');
 $check(str_contains($controllerSource, 'ob_start'), '控制器应捕获模板输出');
+$check(str_contains($controllerSource, 'InstalledVersions'), '控制器应从 Composer 运行时读取版本');
+$check(str_contains($controllerSource, "'dev'"), '控制器应提供开发版本回退');
 $check(str_contains($controllerSource, 'function sync') === false, '控制器不应提供 sync 接口');
 
 $storeSource = (string) file_get_contents($packageRoot . '/src/Store.php');

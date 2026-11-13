@@ -143,10 +143,9 @@ think-store/
 │  ├─ view/
 │  │  ├─ index.html          # 发布包管理首页模板
 │  │  └─ intro.html          # 使用说明页模板
-│  ├─ assets/
-│  │  ├─ css/index.css       # 管理页自定义样式
-│  │  └─ layui/              # layui 本地资源
-│  └─ readme.md
+│  └─ assets/
+│     ├─ css/index.css       # 管理页自定义样式
+│     └─ layui/              # layui 本地资源
 ├─ tests/
 │  └─ verify.php
 ├─ LICENSE
