@@ -4,7 +4,7 @@
   var cfg = window.STORE_CONFIG || {};
   var api = String(cfg.api || '').replace(/\/+$/, '');
   var state = {
-    table: null,
+
     layer: null,
     loading: false,
     data: null
@@ -82,72 +82,61 @@
   function fail(message) {
     text('st-summary', message);
     text('st-publish', message);
+
+    var node = el('st-package-list');
+
+    if (node && !node.querySelector('.st-package-card')) {
+      node.innerHTML = '<div class="st-package-empty"></div>';
+      node.firstChild.textContent = message;
+    }
+
     notify(message);
   }
 
-  function renderTable(list) {
-    if (!state.table) {
+  function packageCard(row) {
+    var version = row.version
+      ? '<span class="st-package-version">' + escapeHtml(row.version) + '</span>'
+      : '';
+    var description = row.description
+      ? '<p class="st-package-desc">' + escapeHtml(row.description) + '</p>'
+      : '<p class="st-package-desc is-empty">暂无描述</p>';
+    var href = safeUrl(row.home);
+    var home = href
+      ? '<a class="st-home-link" href="' + escapeHtml(href) + '" target="_blank" rel="noopener">' + escapeHtml(href) + '</a>'
+      : '<span class="st-package-muted">未配置首页</span>';
+    var path = row.path
+      ? '<code class="st-path">' + escapeHtml(row.path) + '</code>'
+      : '<span class="st-package-muted">未找到安装目录</span>';
+
+    return '<article class="st-package-card">'
+      + '<div class="st-package-head">'
+      + '<span class="st-package-icon"><i class="layui-icon layui-icon-component"></i></span>'
+      + '<span class="st-package-name">' + escapeHtml(row.package) + '</span>'
+      + version
+      + '</div>'
+      + description
+      + '<div class="st-package-meta">'
+      + '<span class="st-package-label"><i class="layui-icon layui-icon-website"></i>首页</span>'
+      + home
+      + '<span class="st-package-label"><i class="layui-icon layui-icon-file"></i>安装目录</span>'
+      + path
+      + '</div>'
+      + '</article>';
+  }
+
+  function renderPackages(list) {
+    var node = el('st-package-list');
+
+    if (!node) {
       return;
     }
 
-    state.table.render({
-      elem: '#st-package-table',
-      id: 'st-package-table',
-      data: list,
-      page: false,
-      even: true,
-      text: {
-        none: '暂无已安装的 think-store 发布包'
-      },
-      cols: [[
-        {
-          field: 'package',
-          title: '发布包',
-          minWidth: 280,
-          templet: function (row) {
-            var name = '<span class="st-package-name">' + escapeHtml(row.package) + '</span>';
-            var description = row.description
-              ? '<span class="st-package-desc">' + escapeHtml(row.description) + '</span>'
-              : '';
+    if (!list.length) {
+      node.innerHTML = '<div class="st-package-empty">暂无已安装的 think-store 发布包</div>';
+      return;
+    }
 
-            return name + description;
-          }
-        },
-        {
-          field: 'version',
-          title: '版本',
-          width: 110,
-          align: 'center',
-          templet: function (row) {
-            return row.version
-              ? '<code class="st-path">' + escapeHtml(row.version) + '</code>'
-              : '<span class="st-muted-text">—</span>';
-          }
-        },
-        {
-          field: 'home',
-          title: '首页',
-          width: 170,
-          templet: function (row) {
-            var href = safeUrl(row.home);
-
-            return href
-              ? '<a class="st-home-link" href="' + escapeHtml(href) + '" target="_blank" rel="noopener"><i class="layui-icon layui-icon-website"></i> ' + escapeHtml(href) + '</a>'
-              : '<span class="st-muted-text">—</span>';
-          }
-        },
-        {
-          field: 'path',
-          title: '安装目录',
-          minWidth: 300,
-          templet: function (row) {
-            return row.path
-              ? '<code class="st-path">' + escapeHtml(row.path) + '</code>'
-              : '<span class="st-muted-text">—</span>';
-          }
-        }
-      ]]
-    });
+    node.innerHTML = list.map(packageCard).join('');
   }
 
   function render(body) {
@@ -169,7 +158,7 @@
       json.textContent = JSON.stringify(body, null, 2);
     }
 
-    renderTable(list);
+    renderPackages(list);
   }
 
   function load() {
@@ -180,7 +169,13 @@
     setLoading(true);
     text('st-summary', '正在读取发布包…');
 
-    fetch(api + '/packages', {
+    var node = el('st-package-list');
+
+    if (node && !node.querySelector('.st-package-card')) {
+      node.innerHTML = '<div class="st-package-empty">正在读取发布包…</div>';
+    }
+
+    fetch(api + '/think-store/packages', {
       headers: { Accept: 'application/json' },
       cache: 'no-store'
     })
@@ -315,11 +310,10 @@
     initJson();
     initAnchorNav();
 
-    if (!el('st-package-table')) {
+    if (!el('st-package-list')) {
       return;
     }
 
-    state.table = window.layui.table;
     state.layer = window.layui.layer;
 
     var refresh = el('st-refresh');
@@ -333,7 +327,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     if (window.layui && typeof window.layui.use === 'function') {
-      window.layui.use(['table', 'layer'], boot);
+      window.layui.use(['layer'], boot);
       return;
     }
 

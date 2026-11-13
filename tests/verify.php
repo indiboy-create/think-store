@@ -96,14 +96,14 @@ $check(!is_dir($packageRoot . '/theme/theme'), 'theme 目录内不应再嵌套 t
 
 $indexSource = (string) file_get_contents($packageRoot . '/theme/view/index.html');
 
-$check(str_contains($indexSource, 'id="st-package-table"'), '管理首页模板应包含发布包表格容器');
+$check(str_contains($indexSource, 'id="st-package-list"'), '管理首页模板应包含发布包卡片容器');
 $check(str_contains($indexSource, 'id="st-json-wrap"'), '管理首页模板应包含数据面板');
 $check(str_contains($indexSource, 'data-api="{$api}"'), '管理首页模板应使用视图变量声明接口前缀');
 $check(str_contains($indexSource, '{$api}/assets/layui/css/layui.css'), '管理首页模板应引用 assets 路由的 layui 样式');
 $check(str_contains($indexSource, '{$api}/assets/layui/layui.js'), '管理首页模板应引用 assets 路由的 layui 脚本');
 $check(str_contains($indexSource, '{$api}/assets/js/store.js'), '管理首页模板应引用页面脚本');
 $check(str_contains($indexSource, 'window.STORE_CONFIG'), '管理首页模板应注入接口配置');
-$check(str_contains($indexSource, '{$api}/intro'), '管理首页模板应链接使用说明路由');
+$check(str_contains($indexSource, '{$api}/think-store/intro'), '管理首页模板应链接使用说明路由');
 $check(str_contains($indexSource, '{$version}'), '管理首页模板应使用视图变量输出版本号');
 $check(str_contains($indexSource, 'class="st-hero"'), '管理首页模板应包含 hero 区域');
 $check(!str_contains($indexSource, '/packages/sync'), '管理首页模板不应包含同步接口调用');
@@ -111,9 +111,9 @@ $check(!str_contains($indexSource, 'cdn'), '管理首页模板不应使用 CDN �
 
 $scriptSource = (string) file_get_contents($packageRoot . '/theme/assets/js/store.js');
 
-$check(str_contains($scriptSource, "layui.use(['table', 'layer']"), '页面脚本应加载 layui table 与 layer');
-$check(str_contains($scriptSource, 'table.render'), '页面脚本应渲染数据表格');
-$check(str_contains($scriptSource, "api + '/packages'"), '页面脚本应请求查询接口');
+$check(str_contains($scriptSource, "layui.use(['layer']"), '页面脚本应加载 layui layer');
+$check(str_contains($scriptSource, 'st-package-card'), '页面脚本应渲染发布包卡片');
+$check(str_contains($scriptSource, "api + '/think-store/packages'"), '页面脚本应请求查询接口');
 $check(str_contains($scriptSource, 'fetch('), '页面脚本应使用 fetch 读取数据');
 $check(str_contains($scriptSource, 'st-json-toggle'), '页面脚本应支持展开原始 JSON');
 $check(str_contains($scriptSource, 'st-nav-toggle'), '页面脚本应支持移动端导航');
@@ -122,8 +122,8 @@ $check(str_contains($scriptSource, 'row.home'), '页面脚本应渲染发布包�
 $introSource = (string) file_get_contents($packageRoot . '/theme/view/intro.html');
 
 $check(str_contains($introSource, '使用说明'), '使用说明模板应存在');
-$check(str_contains($introSource, '/store/packages'), '使用说明模板应描述查询接口');
-$check(str_contains($introSource, '<code>/store</code>'), '使用说明模板应描述页面路由');
+$check(str_contains($introSource, '/store/think-store/packages'), '使用说明模板应描述查询接口');
+$check(str_contains($introSource, '<code>/store/think-store/index</code>'), '使用说明模板应描述页面路由');
 $check(str_contains($introSource, '/store/assets/'), '使用说明模板应描述 assets 路由');
 $check(str_contains($introSource, '{$api}/assets/layui/css/layui.css'), '使用说明模板应引用 assets 路由的 layui 样式');
 $check(str_contains($introSource, '{$api}/assets/js/store.js'), '使用说明模板应引用页面脚本');
@@ -141,9 +141,9 @@ $check(!str_contains($styleSource, 'cdn'), '样式不应依赖 CDN 资源');
 
 $routeSource = (string) file_get_contents($packageRoot . '/route/store.php');
 
-$check(str_contains($routeSource, "Route::get('packages'"), '路由应注册 GET packages');
-$check(str_contains($routeSource, "Route::get(''"), '路由应注册 GET 首页');
-$check(str_contains($routeSource, "Route::get('intro'"), '路由应注册 GET intro');
+$check(str_contains($routeSource, "Route::get('think-store/packages'"), '路由应注册 GET think-store/packages');
+$check(str_contains($routeSource, "Route::get('think-store/index'"), '路由应注册 GET think-store/index');
+$check(str_contains($routeSource, "Route::get('think-store/intro'"), '路由应注册 GET think-store/intro');
 $check(str_contains($routeSource, "Route::get('assets/<path>'"), '路由应注册 GET assets/<path>');
 $check(str_contains($routeSource, 'AssetController'), '资源路由应使用 AssetController');
 $check(str_contains($routeSource, "pattern(['path' => '.*'])"), '资源路由应匹配多级路径');

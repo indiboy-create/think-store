@@ -19,7 +19,7 @@
             <a class="is-active" href="#st-overview">概览</a>
             <a href="#st-packages">发布包</a>
             <a href="#st-api">接口</a>
-            <a href="{$api}/intro">文档</a>
+            <a href="{$api}/think-store/intro">文档</a>
         </nav>
         <span class="st-source"><i class="layui-icon layui-icon-fire"></i> 只读查询</span>
         <button type="button" class="st-nav-toggle" id="st-nav-toggle" aria-label="打开导航" aria-expanded="false" aria-controls="st-nav">
@@ -48,7 +48,7 @@
 
                 <div class="st-hero-tags">
                     <span class="st-tag" id="st-prefix-tag">youvision/think-store-*</span>
-                    <span class="st-tag is-ghost">GET /packages</span>
+                    <span class="st-tag is-ghost">GET /think-store/packages</span>
                     <span class="st-tag is-ghost">assets 路由</span>
                 </div>
             </div>
@@ -61,8 +61,8 @@
                     </div>
 
                     <div class="st-glass-fields">
-                        <div class="st-field"><span>查询接口</span><code>GET /packages</code></div>
-                        <div class="st-field"><span>页面路由</span><code>/store</code></div>
+                        <div class="st-field"><span>查询接口</span><code>GET /think-store/packages</code></div>
+                        <div class="st-field"><span>页面路由</span><code>/store/think-store/index</code></div>
                         <div class="st-field"><span>当前版本</span><code>{$version}</code></div>
                     </div>
 
@@ -73,7 +73,7 @@
                     <p class="st-hint">读取 Composer 已安装包，不写入任何文件。</p>
 
                     <div class="st-quick">
-                        <a class="st-quick-link" href="{$api}/intro"><i class="layui-icon layui-icon-read"></i> 使用说明</a>
+                        <a class="st-quick-link" href="{$api}/think-store/intro"><i class="layui-icon layui-icon-read"></i> 使用说明</a>
                         <a class="st-quick-link" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener"><i class="layui-icon layui-icon-log"></i> GitHub</a>
                     </div>
                 </div>
@@ -122,8 +122,8 @@
                     </div>
                     <span class="st-panel-tip" id="st-summary">正在加载…</span>
                 </div>
-                <div class="st-table-wrap">
-                    <table id="st-package-table" lay-filter="st-package-table"></table>
+                <div class="st-package-grid" id="st-package-list">
+                    <div class="st-package-empty">正在读取发布包…</div>
                 </div>
             </article>
 
@@ -144,7 +144,7 @@
                     <pre class="st-json" id="st-json">{}</pre>
                 </div>
                 <div class="st-side-foot">
-                    <span>GET /packages</span>
+                    <span>GET /think-store/packages</span>
                     <span>记录 <code id="st-json-count">0</code></span>
                 </div>
             </aside>
@@ -161,15 +161,15 @@
 
             <div class="st-api-grid">
                 <article class="st-api-card">
-                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/packages</code></div>
+                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/think-store/packages</code></div>
                     <p>返回 <code>total</code> 与 <code>packages</code>，包含包名、版本、描述、首页路由与安装目录。</p>
                 </article>
                 <article class="st-api-card">
-                    <div class="st-api-head"><span class="st-method">GET</span><code>/store</code></div>
+                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/think-store/index</code></div>
                     <p>由 think-view 渲染发布包管理页，模板位于包内 <code>theme/view</code>。</p>
                 </article>
                 <article class="st-api-card">
-                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/intro</code></div>
+                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/think-store/intro</code></div>
                     <p>渲染使用说明页，包含安装、配置与接口说明。</p>
                 </article>
                 <article class="st-api-card">
@@ -195,7 +195,7 @@
                     <a class="st-btn st-btn-primary" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener">
                         <i class="layui-icon layui-icon-log"></i> 访问 GitHub
                     </a>
-                    <a class="st-btn st-btn-ghost" href="{$api}/intro">查看使用说明</a>
+                    <a class="st-btn st-btn-ghost" href="{$api}/think-store/intro">查看使用说明</a>
                 </div>
             </div>
         </section>
@@ -226,9 +226,9 @@
             <div>
                 <h4>接口</h4>
                 <div class="st-footer-links">
-                    <a href="{$api}/packages">发布包 JSON</a>
-                    <a href="{$api}">管理页</a>
-                    <a href="{$api}/intro">使用说明</a>
+                    <a href="{$api}/think-store/packages">发布包 JSON</a>
+                    <a href="{$api}/think-store/index">管理页</a>
+                    <a href="{$api}/think-store/intro">使用说明</a>
                     <a href="{$api}/assets/layui/css/layui.css">静态资源</a>
                 </div>
             </div>

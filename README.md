@@ -10,7 +10,7 @@ ThinkPHP 8 商店管理扩展，用于管理主项目中已安装的 `youvision/
 提供三项核心能力：
 
 - **发布包查询**：列出已安装的 `think-store-*` 发布包及其版本、描述与安装目录。
-- **管理首页**：基于 think-view 渲染的 layui 数据表格页面，可视化查看发布包列表。
+- **管理首页**：基于 think-view 渲染的 layui 卡片式页面，可视化查看发布包列表与首页路由。
 - **包内静态资源**：通过内置 assets 路由直接输出 `theme/assets`，无需发布到 `public`。
 
 ## 环境要求
@@ -38,12 +38,12 @@ php think vendor:publish
 
 | 方法 | 地址 | 说明 |
 | --- | --- | --- |
-| GET | `/store` | 渲染发布包管理首页 |
-| GET | `/store/intro` | 渲染使用说明页 |
-| GET | `/store/packages` | 查询已安装的发布包 |
+| GET | `/store/think-store/index` | 渲染发布包管理首页 |
+| GET | `/store/think-store/intro` | 渲染使用说明页 |
+| GET | `/store/think-store/packages` | 查询已安装的发布包 |
 | GET | `/store/assets/<path>` | 直接输出包内 `theme/assets`，含 layui 与样式 |
 
-路由前缀由 `config/store.php` 的 `route.prefix` 控制，默认 `store`；设为空字符串时地址变为 `/`、`/intro`、`/packages` 等。
+路由前缀由 `config/store.php` 的 `route.prefix` 控制，默认 `store`；设为空字符串时地址变为 `/think-store/index`、`/think-store/packages` 等。
 
 ## 页面与静态资源
 
@@ -54,8 +54,8 @@ php think vendor:publish
 访问地址：
 
 ```text
-/store
-/store/intro
+/store/think-store/index
+/store/think-store/intro
 /store/assets/layui/css/layui.css
 ```
 
@@ -64,7 +64,7 @@ php think vendor:publish
 ## 查询接口
 
 ```http
-GET /store/packages
+GET /store/think-store/packages
 ```
 
 响应示例：
