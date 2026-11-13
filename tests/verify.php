@@ -80,7 +80,7 @@ foreach ([
     'route/store.php',
     'config/store.php',
     'theme/view/index.html',
-    'theme/view/intro.html',
+
 
     'theme/assets/css/index.css',
     'theme/assets/js/store.js',
@@ -94,43 +94,48 @@ foreach ([
 
 $check(!is_dir($packageRoot . '/project'), 'project 目录应已迁移为 theme');
 $check(!is_dir($packageRoot . '/theme/theme'), 'theme 目录内不应再嵌套 theme');
+$check(!is_file($packageRoot . '/theme/view/intro.html'), '使用说明模板应已整合进首页');
 
 $indexSource = (string) file_get_contents($packageRoot . '/theme/view/index.html');
 
-$check(str_contains($indexSource, 'id="st-package-list"'), '管理首页模板应包含发布包卡片容器');
-$check(str_contains($indexSource, 'id="st-json-wrap"'), '管理首页模板应包含数据面板');
+$check(str_contains($indexSource, 'id="st-package-table"'), '管理首页模板应包含 layui 数据表格容器');
+$check(str_contains($indexSource, 'lay-filter="st-package-table"'), '管理首页模板应配置 layui 表格过滤器');
+$check(str_contains($indexSource, 'layui-card'), '管理首页表格应使用 layui 卡片样式');
+$check(str_contains($indexSource, 'st-table-toolbar'), '管理首页表格应包含工具栏');
+$check(!str_contains($indexSource, 'st-metrics'), '管理首页不应包含四宫格指标');
+$check(!str_contains($indexSource, 'st-json-wrap'), '管理首页不应包含数据看板');
 $check(str_contains($indexSource, 'data-api="{$api}"'), '管理首页模板应使用视图变量声明接口前缀');
 $check(str_contains($indexSource, '{$api}/assets/layui/css/layui.css'), '管理首页模板应引用 assets 路由的 layui 样式');
 $check(str_contains($indexSource, '{$api}/assets/layui/layui.js'), '管理首页模板应引用 assets 路由的 layui 脚本');
 $check(str_contains($indexSource, '{$api}/assets/js/store.js'), '管理首页模板应引用页面脚本');
 $check(str_contains($indexSource, 'window.STORE_CONFIG'), '管理首页模板应注入接口配置');
-$check(str_contains($indexSource, '{$api}/think-store/intro'), '管理首页模板应链接使用说明路由');
+$check(str_contains($indexSource, 'href="#st-docs"'), '管理首页模板应提供文档锚点链接');
 $check(str_contains($indexSource, '{$version}'), '管理首页模板应使用视图变量输出版本号');
 $check(str_contains($indexSource, 'class="st-hero"'), '管理首页模板应包含 hero 区域');
+$check(str_contains($indexSource, 'st-btn-primary'), '访问按钮应使用品牌主按钮配色');
 $check(!str_contains($indexSource, '/packages/sync'), '管理首页模板不应包含同步接口调用');
 $check(!str_contains($indexSource, 'cdn'), '管理首页模板不应使用 CDN 资源');
 
 $scriptSource = (string) file_get_contents($packageRoot . '/theme/assets/js/store.js');
 
-$check(str_contains($scriptSource, "layui.use(['layer']"), '页面脚本应加载 layui layer');
-$check(str_contains($scriptSource, 'st-package-card'), '页面脚本应渲染发布包卡片');
+$check(str_contains($scriptSource, "layui.use(['table', 'layer']"), '页面脚本应加载 layui table 与 layer');
+$check(str_contains($scriptSource, 'table.render'), '页面脚本应渲染 layui 数据表格');
+$check(str_contains($scriptSource, 'defaultToolbar'), '页面脚本应启用 layui 默认工具栏');
+$check(str_contains($scriptSource, 'sort: true'), '页面脚本应支持列排序');
 $check(str_contains($scriptSource, "api + '/think-store/packages'"), '页面脚本应请求查询接口');
 $check(str_contains($scriptSource, 'fetch('), '页面脚本应使用 fetch 读取数据');
-$check(str_contains($scriptSource, 'st-json-toggle'), '页面脚本应支持展开原始 JSON');
+$check(!str_contains($scriptSource, 'st-json-toggle'), '页面脚本不应保留数据看板交互');
 $check(str_contains($scriptSource, 'st-nav-toggle'), '页面脚本应支持移动端导航');
 $check(str_contains($scriptSource, 'row.home'), '页面脚本应渲染发布包首页路由');
+$check(str_contains($scriptSource, 'st-btn-visit'), '访问按钮应使用独立配色');
 
-$introSource = (string) file_get_contents($packageRoot . '/theme/view/intro.html');
-
-$check(str_contains($introSource, '使用说明'), '使用说明模板应存在');
-$check(str_contains($introSource, '/store/think-store/packages'), '使用说明模板应描述查询接口');
-$check(str_contains($introSource, '<code>/store/think-store/index</code>'), '使用说明模板应描述页面路由');
-$check(str_contains($introSource, '/store/assets/'), '使用说明模板应描述 assets 路由');
-$check(str_contains($introSource, '{$api}/assets/layui/css/layui.css'), '使用说明模板应引用 assets 路由的 layui 样式');
-$check(str_contains($introSource, '{$api}/assets/js/store.js'), '使用说明模板应引用页面脚本');
-$check(str_contains($introSource, '{$version}'), '使用说明模板应使用视图变量输出版本号');
-$check(str_contains($introSource, 'class="st-config"'), '使用说明模板应包含配置说明');
-$check(!str_contains($introSource, 'packages/sync'), '使用说明模板不应描述同步接口');
+$check(str_contains($indexSource, 'id="st-docs"'), '管理首页应包含使用文档区');
+$check(!str_contains($indexSource, 'st-doc-nav'), '管理首页文档不应包含目录导航');
+$check(str_contains($indexSource, '安装与部署'), '管理首页文档应包含安装说明');
+$check(str_contains($indexSource, 'class="st-config"'), '管理首页文档应包含配置说明');
+$check(str_contains($indexSource, '安全建议'), '管理首页文档应包含安全建议');
+$check(str_contains($indexSource, '模板与缓存'), '管理首页文档应包含缓存说明');
+$check(!str_contains($indexSource, 'packages/sync'), '管理首页不应描述同步接口');
 
 $styleSource = (string) file_get_contents($packageRoot . '/theme/assets/css/index.css');
 
@@ -177,7 +182,8 @@ $check(str_contains($serviceSource, 'getRootPath'), '服务应使用主项目根
 $controllerSource = (string) file_get_contents($packageRoot . '/src/StoreController.php');
 
 $check(str_contains($controllerSource, 'function index'), '控制器应提供 index 页面');
-$check(str_contains($controllerSource, 'function intro'), '控制器应提供 intro 页面');
+$check(str_contains($controllerSource, 'function intro'), '控制器应提供 intro 兼容入口');
+$check(str_contains($controllerSource, "redirect(\$this->apiPrefix() . '/think-store/index#st-docs')"), '控制器应将旧说明页重定向到文档区');
 $check(str_contains($controllerSource, 'function packages'), '控制器应提供 packages 接口');
 $check(str_contains($controllerSource, 'View $view'), '控制器应注入包内渲染器');
 $check(str_contains($controllerSource, '$this->view->render'), '控制器应通过渲染器输出页面');
@@ -194,6 +200,8 @@ $check(str_contains($viewSource, 'cache_path'), '渲染器应配置模板缓存�
 $check(str_contains($viewSource, 'getRuntimePath'), '渲染器应使用主项目运行时目录');
 $check(str_contains($viewSource, 'cache_prefix'), '渲染器应使用独立的模板缓存前缀');
 $check(str_contains($viewSource, 'ob_start'), '渲染器应捕获模板输出');
+$check(str_contains($viewSource, 'templateFile'), '渲染器应解析完整模板路径');
+$check(str_contains($viewSource, 'PATHINFO_EXTENSION'), '渲染器应补全模板后缀');
 
 $storeSource = (string) file_get_contents($packageRoot . '/src/Store.php');
 

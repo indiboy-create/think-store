@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Youvision\ThinkStore;
 
 use think\response\Json;
+use think\response\Redirect;
 
 class StoreController
 {
@@ -21,11 +22,11 @@ class StoreController
     }
 
     /**
-     * 渲染使用说明页。
+     * 兼容旧地址，跳转到管理页的使用文档。
      */
-    public function intro(): string
+    public function intro(): Redirect
     {
-        return $this->render('intro');
+        return redirect($this->apiPrefix() . '/think-store/index#st-docs');
     }
 
     /**

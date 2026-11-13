@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>发布包管理 · Think Store</title>
-<meta name="description" content="ThinkPHP 8 商店发布包管理：查询已安装的 youvision/think-store-* 扩展。">
+<meta name="description" content="ThinkPHP 8 商店发布包管理：查询已安装的 youvision/think-store-* 扩展，并查看安装、配置与安全说明。">
 <link rel="stylesheet" href="{$api}/assets/layui/css/layui.css">
 <link rel="stylesheet" href="{$api}/assets/css/index.css">
 </head>
@@ -19,7 +19,7 @@
             <a class="is-active" href="#st-overview">概览</a>
             <a href="#st-packages">发布包</a>
             <a href="#st-api">接口</a>
-            <a href="{$api}/think-store/intro">文档</a>
+            <a href="#st-docs">文档</a>
         </nav>
         <span class="st-source"><i class="layui-icon layui-icon-fire"></i> 只读查询</span>
         <button type="button" class="st-nav-toggle" id="st-nav-toggle" aria-label="打开导航" aria-expanded="false" aria-controls="st-nav">
@@ -49,7 +49,7 @@
                 <div class="st-hero-tags">
                     <span class="st-tag" id="st-prefix-tag">youvision/think-store-*</span>
                     <span class="st-tag is-ghost">GET /think-store/packages</span>
-                    <span class="st-tag is-ghost">assets 路由</span>
+                    <span class="st-tag is-ghost">文档已整合</span>
                 </div>
             </div>
 
@@ -73,7 +73,7 @@
                     <p class="st-hint">读取 Composer 已安装包，不写入任何文件。</p>
 
                     <div class="st-quick">
-                        <a class="st-quick-link" href="{$api}/think-store/intro"><i class="layui-icon layui-icon-read"></i> 使用说明</a>
+                        <a class="st-quick-link" href="#st-docs"><i class="layui-icon layui-icon-read"></i> 使用文档</a>
                         <a class="st-quick-link" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener"><i class="layui-icon layui-icon-log"></i> GitHub</a>
                     </div>
                 </div>
@@ -82,73 +82,35 @@
     </section>
 
     <div class="st-container st-content">
-        <section class="st-metrics">
-            <article class="st-metric">
-                <span class="st-metric-icon">📦</span>
+        <section class="st-section" id="st-packages" style="padding-top: 8px;">
+
+            <div class="st-section-head">
                 <div>
-                    <span class="st-metric-label">发布包总数</span>
-                    <strong id="st-total-metric">--</strong>
+                    <span class="st-eyebrow">ThinkStore</span>
+                    <h2>ThinkPHP</h2>
+                    <p>面向 ThinkPHP 8 的商店管理扩展。</p>
                 </div>
-            </article>
-            <article class="st-metric">
-                <span class="st-metric-icon">🏷️</span>
-                <div>
-                    <span class="st-metric-label">当前版本</span>
-                    <strong>{$version}</strong>
+            </div>
+
+            <div class="st-table-card layui-card">
+                <div class="layui-card-header">
+                    <span>发布包列表</span>
+                    <span class="st-table-count" id="st-summary">正在加载…</span>
                 </div>
-            </article>
-            <article class="st-metric">
-                <span class="st-metric-icon">🔖</span>
-                <div>
-                    <span class="st-metric-label">识别前缀</span>
-                    <strong>youvision/think-store-</strong>
+                <div class="layui-card-body st-table-wrap">
+                    <table id="st-package-table" lay-filter="st-package-table"></table>
                 </div>
-            </article>
-            <article class="st-metric">
-                <span class="st-metric-icon">🗂️</span>
-                <div>
-                    <span class="st-metric-label">资源路由</span>
-                    <strong>/assets/&lt;path&gt;</strong>
-                </div>
-            </article>
+            </div>
         </section>
 
-        <section class="st-grid-2" id="st-packages">
-            <article class="st-panel">
-                <div class="st-panel-head">
-                    <div>
-                        <span class="st-eyebrow">Packages</span>
-                        <h2>发布包列表</h2>
-                    </div>
-                    <span class="st-panel-tip" id="st-summary">正在加载…</span>
-                </div>
-                <div class="st-package-grid" id="st-package-list">
-                    <div class="st-package-empty">正在读取发布包…</div>
-                </div>
-            </article>
-
-            <aside class="st-panel st-side">
-                <div class="st-panel-head">
-                    <div>
-                        <span class="st-eyebrow">Raw JSON</span>
-                        <h2>数据面板</h2>
-                    </div>
-                    <button type="button" class="st-btn st-btn-outline st-btn-sm" id="st-json-toggle">
-                        <i class="layui-icon layui-icon-down"></i> 展开
-                    </button>
-                </div>
-                <p class="st-side-desc">
-                    接口返回 Composer 已安装包信息，前端仅负责展示，便于对照真实结构排查问题。
-                </p>
-                <div class="st-json-wrap" id="st-json-wrap">
-                    <pre class="st-json" id="st-json">{}</pre>
-                </div>
-                <div class="st-side-foot">
-                    <span>GET /think-store/packages</span>
-                    <span>记录 <code id="st-json-count">0</code></span>
-                </div>
-            </aside>
-        </section>
+        <script type="text/html" id="st-table-toolbar">
+            <div class="layui-btn-container st-table-toolbar">
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-primary" lay-event="refresh">
+                    <i class="layui-icon layui-icon-refresh"></i> 刷新
+                </button>
+                <span class="st-table-toolbar-tip">表头可排序，右上角可筛选列、导出或打印</span>
+            </div>
+        </script>
 
         <section class="st-section" id="st-api">
             <div class="st-section-head">
@@ -166,11 +128,11 @@
                 </article>
                 <article class="st-api-card">
                     <div class="st-api-head"><span class="st-method">GET</span><code>/store/think-store/index</code></div>
-                    <p>由 think-view 渲染发布包管理页，模板位于包内 <code>theme/view</code>。</p>
+                    <p>由 think-view 渲染管理页，页面内同时包含发布包列表与使用文档。</p>
                 </article>
                 <article class="st-api-card">
                     <div class="st-api-head"><span class="st-method">GET</span><code>/store/think-store/intro</code></div>
-                    <p>渲染使用说明页，包含安装、配置与接口说明。</p>
+                    <p>兼容旧地址，302 重定向到管理页的使用文档区。</p>
                 </article>
                 <article class="st-api-card">
                     <div class="st-api-head"><span class="st-method">GET</span><code>/store/assets/&lt;path&gt;</code></div>
@@ -181,6 +143,96 @@
             <div class="st-note">
                 <i class="layui-icon layui-icon-tips"></i>
                 <span>静态资源由 <code>/store/assets/&lt;path&gt;</code> 路由直接输出，无需发布到 public；路由前缀可在 <code>config/store.php</code> 中修改。</span>
+            </div>
+        </section>
+
+        <section class="st-section" id="st-docs">
+            <div class="st-section-head">
+                <div>
+                    <span class="st-eyebrow">Documentation</span>
+                    <h2>使用文档</h2>
+                    <p>安装、配置、安全与缓存说明已整合到管理页，无需跳转其他页面。</p>
+                </div>
+                <span class="st-section-tip">4 节 · 随页面加载</span>
+            </div>
+
+            <div class="st-doc-body">
+                    <article class="st-doc-card" id="st-doc-install">
+                        <h3>安装与部署</h3>
+                        <p class="st-doc-desc">服务会自动注册路由与配置，页面与静态资源均无需复制到主项目。</p>
+                        <div class="st-steps">
+                            <article class="st-step">
+                                <span class="st-step-index">01</span>
+                                <h3>安装扩展</h3>
+                                <p>在主项目执行 <code>composer require youvision/think-store</code>，think-view 会随依赖自动安装。</p>
+                            </article>
+                            <article class="st-step">
+                                <span class="st-step-index">02</span>
+                                <h3>注册服务</h3>
+                                <p>执行 <code>php think service:discover</code> 与 <code>php think vendor:publish</code>，路由与配置随即生效。</p>
+                            </article>
+                            <article class="st-step">
+                                <span class="st-step-index">03</span>
+                                <h3>打开管理页</h3>
+                                <p>访问 <code>/store/think-store/index</code> 查看已安装的 <code>think-store-*</code> 发布包与本文档。</p>
+                            </article>
+                            <article class="st-step">
+                                <span class="st-step-index">04</span>
+                                <h3>静态资源</h3>
+                                <p>layui 与样式由 <code>/store/assets/&lt;path&gt;</code> 直接输出，无需发布到 <code>public</code>。</p>
+                            </article>
+                        </div>
+                    </article>
+
+                    <article class="st-doc-card" id="st-doc-config">
+                        <h3>配置项</h3>
+                        <p class="st-doc-desc">包内默认配置会与主项目配置合并，项目侧配置优先。</p>
+                        <div class="st-config">
+                            <div class="st-config-row">
+                                <span class="st-config-key">route.enabled</span>
+                                <span class="st-config-value">默认 <code>true</code>。是否注册内置页面、查询与资源路由；关闭后由主项目自行注册。</span>
+                            </div>
+                            <div class="st-config-row">
+                                <span class="st-config-key">route.prefix</span>
+                                <span class="st-config-value">默认 <code>store</code>。路由前缀，留空表示不添加前缀。</span>
+                            </div>
+                            <div class="st-config-row">
+                                <span class="st-config-key">route.middleware</span>
+                                <span class="st-config-value">默认 <code>[]</code>。应用到整组路由的中间件，生产环境建议配置登录鉴权。</span>
+                            </div>
+                            <div class="st-config-row">
+                                <span class="st-config-key">prefix</span>
+                                <span class="st-config-value">默认 <code>youvision/think-store-</code>。只有包名匹配该前缀的 Composer 包才会被识别。</span>
+                            </div>
+                            <div class="st-config-row">
+                                <span class="st-config-key">exclude</span>
+                                <span class="st-config-value">默认 <code>[]</code>。需要跳过的包名，支持 <code>*</code>、<code>?</code> 通配符。</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="st-doc-card" id="st-doc-security">
+                        <h3>安全建议</h3>
+                        <p class="st-doc-desc">查询接口会暴露包名、版本与安装目录，生产环境请按需限制访问。</p>
+                        <ul class="st-list">
+                            <li>为 <code>route.middleware</code> 配置登录鉴权中间件，避免安装路径与版本信息对外暴露。</li>
+                            <li>资源路由只读取包内 <code>theme/assets</code>，已拒绝目录穿越；不要在主项目额外放行任意文件读取。</li>
+                            <li>模板与静态资源均位于包内，升级扩展后可随 Composer 一起更新，无需手工同步。</li>
+                            <li>安装或移除发布包后，刷新管理页即可获取最新列表。</li>
+                        </ul>
+                    </article>
+
+                    <article class="st-doc-card" id="st-doc-cache">
+                        <h3>模板与缓存</h3>
+                        <p class="st-doc-desc">模板由包内渲染器输出，编译缓存跟随主项目运行时目录。</p>
+                        <ul class="st-list">
+                            <li>模板位于包内 <code>theme/view</code>，由包内 <code>View</code> 渲染器通过 think-view 的 <code>Think</code> 驱动输出。</li>
+                            <li>编译缓存写入主项目 <code>runtime/temp/</code>，文件名以 <code>store_</code> 开头，便于识别与清理。</li>
+                            <li>修改模板未生效时，清理 <code>runtime/temp/store_*.php</code> 或执行 <code>php think clear</code>。</li>
+                            <li>升级扩展后模板与静态资源随 Composer 更新，无需手工同步。</li>
+                        </ul>
+                    </article>
+
             </div>
         </section>
 
@@ -195,7 +247,7 @@
                     <a class="st-btn st-btn-primary" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener">
                         <i class="layui-icon layui-icon-log"></i> 访问 GitHub
                     </a>
-                    <a class="st-btn st-btn-ghost" href="{$api}/think-store/intro">查看使用说明</a>
+                    <a class="st-btn st-btn-ghost" href="#st-docs">查看使用文档</a>
                 </div>
             </div>
         </section>
@@ -220,7 +272,7 @@
                     <a href="#st-packages">发布包列表</a>
                     <a href="#st-packages">版本信息</a>
                     <a href="#st-packages">安装目录</a>
-                    <a href="#st-api">接口说明</a>
+                    <a href="#st-docs">使用文档</a>
                 </div>
             </div>
             <div>
@@ -228,7 +280,7 @@
                 <div class="st-footer-links">
                     <a href="{$api}/think-store/packages">发布包 JSON</a>
                     <a href="{$api}/think-store/index">管理页</a>
-                    <a href="{$api}/think-store/intro">使用说明</a>
+                    <a href="#st-docs">使用文档</a>
                     <a href="{$api}/assets/layui/css/layui.css">静态资源</a>
                 </div>
             </div>

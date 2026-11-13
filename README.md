@@ -10,7 +10,7 @@ ThinkPHP 8 商店管理扩展，用于管理主项目中已安装的 `youvision/
 提供三项核心能力：
 
 - **发布包查询**：列出已安装的 `think-store-*` 发布包及其版本、描述与安装目录。
-- **管理首页**：基于 think-view 渲染的 layui 卡片式页面，可视化查看发布包列表与首页路由。
+- **管理首页**：基于 think-view 渲染的 layui 数据表格页面，查看发布包列表与首页路由，并内置安装、配置与安全文档。
 - **包内静态资源**：通过内置 assets 路由直接输出 `theme/assets`，无需发布到 `public`。
 
 ## 环境要求
@@ -38,8 +38,8 @@ php think vendor:publish
 
 | 方法 | 地址 | 说明 |
 | --- | --- | --- |
-| GET | `/store/think-store/index` | 渲染发布包管理首页 |
-| GET | `/store/think-store/intro` | 渲染使用说明页 |
+| GET | `/store/think-store/index` | 渲染发布包管理首页（含使用文档） |
+| GET | `/store/think-store/intro` | 302 重定向到首页使用文档区 |
 | GET | `/store/think-store/packages` | 查询已安装的发布包 |
 | GET | `/store/assets/<path>` | 直接输出包内 `theme/assets`，含 layui 与样式 |
 
@@ -55,7 +55,7 @@ php think vendor:publish
 
 ```text
 /store/think-store/index
-/store/think-store/intro
+/store/think-store/intro      # 302 重定向到首页文档区
 /store/assets/layui/css/layui.css
 ```
 
@@ -163,8 +163,7 @@ think-store/
 │  └─ AssetController.php    # 包内静态资源输出
 ├─ theme/
 │  ├─ view/
-│  │  ├─ index.html          # 发布包管理首页模板
-│  │  └─ intro.html          # 使用说明页模板
+│  │  └─ index.html          # 管理首页模板（含使用文档）
 │  └─ assets/
 │     ├─ css/index.css       # 管理页自定义样式
 │     └─ layui/              # layui 本地资源

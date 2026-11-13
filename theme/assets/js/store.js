@@ -4,10 +4,9 @@
   var cfg = window.STORE_CONFIG || {};
   var api = String(cfg.api || '').replace(/\/+$/, '');
   var state = {
-
+    table: null,
     layer: null,
-    loading: false,
-    data: null
+    loading: false
   };
 
   function el(id) {
@@ -82,83 +81,80 @@
   function fail(message) {
     text('st-summary', message);
     text('st-publish', message);
-
-    var node = el('st-package-list');
-
-    if (node && !node.querySelector('.st-package-card')) {
-      node.innerHTML = '<div class="st-package-empty"></div>';
-      node.firstChild.textContent = message;
-    }
-
     notify(message);
   }
 
-  function packageCard(row) {
-    var version = row.version
-      ? '<span class="st-package-version">' + escapeHtml(row.version) + '</span>'
-      : '';
-    var description = row.description
-      ? '<p class="st-package-desc">' + escapeHtml(row.description) + '</p>'
-      : '<p class="st-package-desc is-empty">暂无描述</p>';
-    var href = safeUrl(row.home);
-    var home = href
-      ? '<a class="st-home-link" href="' + escapeHtml(href) + '" target="_blank" rel="noopener">' + escapeHtml(href) + '</a>'
-      : '<span class="st-package-muted">未配置首页</span>';
-    var path = row.path
-      ? '<code class="st-path">' + escapeHtml(row.path) + '</code>'
-      : '<span class="st-package-muted">未找到安装目录</span>';
+  function columns() {
+    return [[
+      {
+        field: 'package',
+        title: '发布包',
+        minWidth: 320,
+        sort: true,
+        templet: function (row) {
+          var name = '<span class="st-package-name">' + escapeHtml(row.package) + '</span>';
+          var description = row.description
+            ? '<span class="st-package-desc">' + escapeHtml(row.description) + '</span>'
+            : '';
 
-    return '<article class="st-package-card">'
-      + '<div class="st-package-head">'
-      + '<span class="st-package-icon"><i class="layui-icon layui-icon-component"></i></span>'
-      + '<span class="st-package-name">' + escapeHtml(row.package) + '</span>'
-      + version
-      + '</div>'
-      + description
-      + '<div class="st-package-meta">'
-      + '<span class="st-package-label"><i class="layui-icon layui-icon-website"></i>首页</span>'
-      + home
-      + '<span class="st-package-label"><i class="layui-icon layui-icon-file"></i>安装目录</span>'
-      + path
-      + '</div>'
-      + '</article>';
-  }
+          return name + description;
+        }
+      },
+      {
+        field: 'version',
+        title: '版本',
+        width: 110,
+        sort: true,
+        align: 'center',
+        templet: function (row) {
+          return row.version
+            ? '<code class="st-path">' + escapeHtml(row.version) + '</code>'
+            : '<span class="st-muted-text">—</span>';
+        }
+      },
+      {
+        field: 'home',
+        title: '访问',
+        width: 180,
+        align: 'center',
+        templet: function (row) {
+          var href = safeUrl(row.home);
 
-  function renderPackages(list) {
-    var node = el('st-package-list');
-
-    if (!node) {
-      return;
-    }
-
-    if (!list.length) {
-      node.innerHTML = '<div class="st-package-empty">暂无已安装的 think-store 发布包</div>';
-      return;
-    }
-
-    node.innerHTML = list.map(packageCard).join('');
+          return href
+            ? '<a class="layui-btn layui-btn-sm st-btn-visit" href="' + escapeHtml(href) + '" target="_blank" rel="noopener"><i class="layui-icon layui-icon-website"></i> 访问</a>'
+            : '<span class="st-muted-text">—</span>';
+        }
+      }
+    ]];
   }
 
   function render(body) {
     var list = body && Array.isArray(body.packages) ? body.packages : [];
     var total = body && typeof body.total === 'number' ? body.total : list.length;
 
-    state.data = body;
-
     text('st-total', total);
-    text('st-total-metric', total);
     text('st-summary', '共 ' + total + ' 个发布包');
-    text('st-json-count', total);
     text('st-publish', '已读取 ' + total + ' 个发布包 · ' + stamp());
     text('st-hero-hint', total > 0 ? '按 prefix 识别 · 只读' : '暂未发现匹配的发布包');
 
-    var json = el('st-json');
-
-    if (json) {
-      json.textContent = JSON.stringify(body, null, 2);
-    }
-
-    renderPackages(list);
+    state.table.render({
+      elem: '#st-package-table',
+      id: 'st-package-table',
+      data: list,
+      toolbar: '#st-table-toolbar',
+      defaultToolbar: ['filter', 'exports', 'print'],
+      cellMinWidth: 90,
+      page: {
+        limit: 10,
+        limits: [10, 20, 50],
+        layout: ['count', 'prev', 'page', 'next', 'limit']
+      },
+      even: true,
+      text: {
+        none: '暂无已安装的 think-store 发布包'
+      },
+      cols: columns()
+    });
   }
 
   function load() {
@@ -168,12 +164,6 @@
 
     setLoading(true);
     text('st-summary', '正在读取发布包…');
-
-    var node = el('st-package-list');
-
-    if (node && !node.querySelector('.st-package-card')) {
-      node.innerHTML = '<div class="st-package-empty">正在读取发布包…</div>';
-    }
 
     fetch(api + '/think-store/packages', {
       headers: { Accept: 'application/json' },
@@ -197,23 +187,6 @@
       .then(function () {
         setLoading(false);
       });
-  }
-
-  function initJson() {
-    var toggle = el('st-json-toggle');
-    var wrap = el('st-json-wrap');
-
-    if (!toggle || !wrap) {
-      return;
-    }
-
-    toggle.addEventListener('click', function () {
-      var opened = wrap.classList.toggle('is-open');
-
-      toggle.innerHTML = opened
-        ? '<i class="layui-icon layui-icon-up"></i> 收起'
-        : '<i class="layui-icon layui-icon-down"></i> 展开';
-    });
   }
 
   function initNav() {
@@ -307,13 +280,13 @@
 
   function boot() {
     initNav();
-    initJson();
     initAnchorNav();
 
-    if (!el('st-package-list')) {
+    if (!el('st-package-table')) {
       return;
     }
 
+    state.table = window.layui.table;
     state.layer = window.layui.layer;
 
     var refresh = el('st-refresh');
@@ -322,12 +295,18 @@
       refresh.addEventListener('click', load);
     }
 
+    state.table.on('toolbar(st-package-table)', function (obj) {
+      if (obj.event === 'refresh') {
+        load();
+      }
+    });
+
     load();
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     if (window.layui && typeof window.layui.use === 'function') {
-      window.layui.use(['layer'], boot);
+      window.layui.use(['table', 'layer'], boot);
       return;
     }
 
