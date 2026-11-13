@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Think Store 发布包管理</title>
+<link rel="stylesheet" href="{$api}/assets/layui/css/layui.css">
+<link rel="stylesheet" href="{$api}/assets/css/index.css">
+</head>
+<body class="store-page">
+<header class="store-header">
+    <div class="layui-container store-header__inner">
+        <a class="store-brand" href="{$api}/think-store">Think Store</a>
+        <ul class="layui-nav store-nav" lay-filter="store-nav">
+            <li class="layui-nav-item layui-this"><a href="{$api}/think-store">发布包管理</a></li>
+            <li class="layui-nav-item"><a href="{$api}/think-store/intro">使用说明</a></li>
+        </ul>
+    </div>
+</header>
+<main class="store-main" data-api="{$api}">
+    <div class="layui-container">
+        <section class="store-hero">
+            <p class="store-eyebrow">youvision/think-store</p>
+            <h1 class="store-title">发布包管理：查询已安装扩展</h1>
+            <p class="store-subtitle">查看主项目中已安装的 youvision/think-store-* 发布包及其版本与安装目录。</p>
+            <p class="store-actions">
+                <a class="layui-btn layui-btn-primary" href="{$api}/think-store/intro">查看使用说明</a>
+            </p>
+        </section>
+        <div class="store-toolbar layui-form" lay-filter="store-toolbar">
+            <div class="store-toolbar__summary" id="store-summary">正在加载发布包...</div>
+            <div class="store-toolbar__actions">
+                <button class="layui-btn layui-btn-sm layui-btn-primary" id="refresh" type="button">刷新列表</button>
+            </div>
+        </div>
+        <div class="store-table-card">
+            <table id="package-table" lay-filter="package-table"></table>
+        </div>
+        <p class="store-api-note">
+            接口前缀：<code id="store-api-base">{$api}</code>
+            · <code>GET /packages</code>
+        </p>
+    </div>
+</main>
+<footer class="store-footer">
+    <div class="layui-container store-footer__inner">
+        <span>youvision/think-store <span class="store-version">v{$version}</span></span>
+        <span>MIT License</span>
+    </div>
+</footer>
+<script src="{$api}/assets/layui/layui.js"></script>
+<script>
+layui.use(['table', 'element'], function () {
+    var table = layui.table;
+    var main = document.querySelector('.store-main');
+    var api = ((main && main.getAttribute('data-api')) || '').replace(/\/+$/, '');
+    var summary = document.getElementById('store-summary');
+
+    document.getElementById('store-api-base').textContent = api || '/';
+
+    var escapeHtml = function (value) {
+        return String(value === null || value === undefined ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
+    table.render({
+        elem: '#package-table',
+        id: 'package-table',
+        url: api + '/packages',
+        method: 'get',
+        page: false,
+        even: true,
+        text: {
+            none: '暂无已安装的 think-store 发布包'
+        },
+        parseData: function (res) {
+            if (res && Array.isArray(res.packages)) {
+                return {
+                    code: 0,
+                    msg: '',
+                    count: res.total || res.packages.length,
+                    data: res.packages
+                };
+            }
+
+            return {
+                code: 1,
+                msg: (res && res.message) || '接口返回格式无效',
+                count: 0,
+                data: []
+            };
+        },
+        cols: [[
+            {
+                field: 'package',
+                title: '发布包',
+                minWidth: 320,
+                templet: function (d) {
+                    var description = d.description
+                        ? '<span class="store-package__desc">' + escapeHtml(d.description) + '</span>'
+                        : '';
+
+                    return '<span class="store-package__name">' + escapeHtml(d.package) + '</span>' + description;
+                }
+            },
+            {
+                field: 'version',
+                title: '版本',
+                width: 120,
+                align: 'center',
+                templet: function (d) {
+                    return d.version ? escapeHtml(d.version) : '<span class="store-text-muted">—</span>';
+                }
+            },
+            {
+                field: 'path',
+                title: '安装目录',
+                minWidth: 320,
+                templet: function (d) {
+                    return d.path
+                        ? '<code class="store-code">' + escapeHtml(d.path) + '</code>'
+                        : '<span class="store-text-muted">—</span>';
+                }
+            }
+        ]],
+        done: function (res) {
+            summary.innerHTML = '共 <strong>' + (res.data || []).length + '</strong> 个发布包';
+        },
+        error: function () {
+            summary.textContent = '接口请求失败，请确认路由前缀或服务状态';
+        }
+    });
+
+    document.getElementById('refresh').addEventListener('click', function () {
+        table.reload('package-table');
+    });
+});
+</script>
+</body>
+</html>

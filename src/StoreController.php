@@ -4,13 +4,30 @@ declare(strict_types=1);
 
 namespace Youvision\ThinkStore;
 
-use InvalidArgumentException;
+use think\App;
 use think\response\Json;
+use think\view\driver\Think;
 
 class StoreController
 {
-    public function __construct(protected Store $store)
+    public function __construct(protected Store $store, protected App $app)
     {
+    }
+
+    /**
+     * 渲染发布包管理首页。
+     */
+    public function index(): string
+    {
+        return $this->render('index');
+    }
+
+    /**
+     * 渲染使用说明页。
+     */
+    public function intro(): string
+    {
+        return $this->render('intro');
     }
 
     /**
@@ -26,47 +43,40 @@ class StoreController
         ]);
     }
 
-    /**
-     * 重新同步静态资源。
-     */
-    public function sync(): Json
+    protected function render(string $template): string
     {
-        try {
-            $result = $this->store->sync($this->packagesParam(), $this->forceParam());
-        } catch (InvalidArgumentException $e) {
-            return json([
-                'message' => $e->getMessage(),
-            ], 400);
-        }
+        $driver = new Think($this->app, [
+            'view_path'   => dirname(__DIR__) . '/theme/view/',
+            'view_suffix' => 'html',
+        ]);
 
-        return json($result);
+        ob_start();
+
+        $driver->fetch($template, [
+            'api'     => $this->apiPrefix(),
+            'version' => $this->version(),
+        ]);
+
+        return (string) ob_get_clean();
     }
 
-    protected function packagesParam(): string|array|null
+    protected function apiPrefix(): string
     {
-        $packages = request()->param('packages');
+        $prefix = trim((string) config('store.route.prefix', 'store'), '/');
 
-        if (is_array($packages)) {
-            return $packages;
-        }
-
-        if (is_scalar($packages)) {
-            return (string) $packages;
-        }
-
-        return null;
+        return $prefix === '' ? '' : '/' . $prefix;
     }
 
-    protected function forceParam(): ?bool
+    protected function version(): string
     {
-        $value = request()->param('force');
+        $file = dirname(__DIR__) . '/composer.json';
 
-        if ($value === null || $value === '') {
-            return null;
+        if (!is_file($file)) {
+            return '';
         }
 
-        $force = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        $json = json_decode((string) file_get_contents($file), true);
 
-        return $force === null ? null : (bool) $force;
+        return is_array($json) ? (string) ($json['version'] ?? '') : '';
     }
 }

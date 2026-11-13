@@ -5,8 +5,7 @@ return [
     |--------------------------------------------------------------------------
     | 内置路由
     |--------------------------------------------------------------------------
-    | 控制查询与同步接口是否随服务自动注册。最终地址为
-    | /{prefix}/packages 和 /{prefix}/packages/sync。
+    | 控制查询接口是否随服务自动注册。最终地址为 /{prefix}/packages。
     */
     'route' => [
         // 是否启用内置路由；关闭后可在应用路由文件中自行定义
@@ -37,27 +36,4 @@ return [
     | ['youvision/think-store-api', 'youvision/think-store-test-*']。
     */
     'exclude' => [],
-
-    /*
-    |--------------------------------------------------------------------------
-    | 静态资源部署
-    |--------------------------------------------------------------------------
-    | 以下配置用于调用 youvision/think-static 部署各发布包的 project 目录。
-    | root、manifest、skip_dot_files 会优先读取主项目 composer.json 中
-    | extra.think-static 的同名配置，保证与 think-static 插件保持一致。
-    */
-    // 部署根目录，相对主项目根目录，例如 public/store
-    'root' => 'public/store',
-
-    // 发布包内的资源目录，相对各包安装目录，通常为 project
-    'project_dir' => 'project',
-
-    // 资源目录内的部署配置文件名
-    'manifest' => 'project.json',
-
-    // 重新同步时是否覆盖已存在的同名文件；false 表示只补齐缺失文件
-    'force' => true,
-
-    // 是否跳过以点开头的隐藏文件
-    'skip_dot_files' => true,
 ];
