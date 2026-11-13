@@ -31,6 +31,16 @@
       .replace(/'/g, '&#39;');
   }
 
+  function safeUrl(value) {
+    var url = String(value === undefined || value === null ? '' : value).trim();
+
+    if (!url) {
+      return '';
+    }
+
+    return /^(?:https?:\/\/|\/)/i.test(url) ? url : '';
+  }
+
   function stamp() {
     var now = new Date();
     var pad = function (value) {
@@ -111,6 +121,18 @@
           templet: function (row) {
             return row.version
               ? '<code class="st-path">' + escapeHtml(row.version) + '</code>'
+              : '<span class="st-muted-text">—</span>';
+          }
+        },
+        {
+          field: 'home',
+          title: '首页',
+          width: 170,
+          templet: function (row) {
+            var href = safeUrl(row.home);
+
+            return href
+              ? '<a class="st-home-link" href="' + escapeHtml(href) + '" target="_blank" rel="noopener"><i class="layui-icon layui-icon-website"></i> ' + escapeHtml(href) + '</a>'
               : '<span class="st-muted-text">—</span>';
           }
         },

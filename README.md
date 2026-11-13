@@ -38,12 +38,12 @@ php think vendor:publish
 
 | 方法 | 地址 | 说明 |
 | --- | --- | --- |
-| GET | `/store/think-store` | 渲染发布包管理首页 |
-| GET | `/store/think-store/intro` | 渲染使用说明页 |
+| GET | `/store` | 渲染发布包管理首页 |
+| GET | `/store/intro` | 渲染使用说明页 |
 | GET | `/store/packages` | 查询已安装的发布包 |
 | GET | `/store/assets/<path>` | 直接输出包内 `theme/assets`，含 layui 与样式 |
 
-路由前缀由 `config/store.php` 的 `route.prefix` 控制，默认 `store`；设为空字符串时地址变为 `/think-store`、`/packages` 等。
+路由前缀由 `config/store.php` 的 `route.prefix` 控制，默认 `store`；设为空字符串时地址变为 `/`、`/intro`、`/packages` 等。
 
 ## 页面与静态资源
 
@@ -54,8 +54,8 @@ php think vendor:publish
 访问地址：
 
 ```text
-/store/think-store
-/store/think-store/intro
+/store
+/store/intro
 /store/assets/layui/css/layui.css
 ```
 
@@ -77,6 +77,7 @@ GET /store/packages
       "package": "youvision/think-store-example",
       "version": "1.1.0",
       "description": "ThinkPHP 8 商店实例包",
+      "home": "/store/example",
       "path": "D:/project/vendor/youvision/think-store-example"
     }
   ]
@@ -88,9 +89,29 @@ GET /store/packages
 | `package` | string | Composer 包名 |
 | `version` | string | 已安装版本 |
 | `description` | string | 包内 `composer.json` 的 `description` |
+| `home` | string | 发布包首页路由，取自包内 `composer.json` 的 `extra.store.home` |
 | `path` | string | 包安装目录绝对路径 |
 
 命中异常时列表仍会正常返回；无法读取描述的包，`description` 为空字符串。
+
+## 发布包首页路由
+
+发布包在自身 `composer.json` 的 `extra.store.home` 中声明首页地址，`packages()` 会将其作为 `home` 字段返回：
+
+```json
+{
+  "name": "youvision/think-store-example",
+  "extra": {
+    "store": {
+      "home": "/store/example"
+    }
+  }
+}
+```
+
+- 值可以是应用内路径（`/store/example`、`store/example`）或完整 URL（`https://example.com`）。
+- 未以 `/` 或 `http(s)://` 开头的相对路径会自动补前导 `/`。
+- 未声明或声明无效的包，`home` 为空字符串。
 
 ## PHP 调用
 

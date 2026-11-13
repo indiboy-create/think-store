@@ -11,15 +11,15 @@
 <body class="st-page">
 <header class="st-header">
     <div class="st-container st-header-inner">
-        <a class="st-brand" href="{$api}/think-store">
+        <a class="st-brand" href="{$api}">
             <span class="st-brand-mark"><i class="layui-icon layui-icon-cart-simple"></i></span>
             <span>Store<small>THINK STORE</small></span>
         </a>
         <nav class="st-nav" id="st-nav">
-            <a href="{$api}/think-store">概览</a>
-            <a href="{$api}/think-store#st-packages">发布包</a>
-            <a href="{$api}/think-store#st-api">接口</a>
-            <a class="is-active" href="{$api}/think-store/intro">文档</a>
+            <a href="{$api}">概览</a>
+            <a href="{$api}#st-packages">发布包</a>
+            <a href="{$api}#st-api">接口</a>
+            <a class="is-active" href="{$api}/intro">文档</a>
         </nav>
         <span class="st-source"><i class="layui-icon layui-icon-fire"></i> 只读查询</span>
         <button type="button" class="st-nav-toggle" id="st-nav-toggle" aria-label="打开导航" aria-expanded="false" aria-controls="st-nav">
@@ -61,12 +61,12 @@
                     </div>
 
                     <div class="st-glass-fields">
-                        <div class="st-field"><span>管理页</span><code>/think-store</code></div>
+                        <div class="st-field"><span>管理页</span><code>/store</code></div>
                         <div class="st-field"><span>查询接口</span><code>GET /packages</code></div>
                         <div class="st-field"><span>资源路由</span><code>/assets/&lt;path&gt;</code></div>
                     </div>
 
-                    <a class="st-btn st-btn-primary st-btn-block" href="{$api}/think-store">
+                    <a class="st-btn st-btn-primary st-btn-block" href="{$api}">
                         <i class="layui-icon layui-icon-cart-simple"></i> 返回发布包管理
                     </a>
 
@@ -103,7 +103,7 @@
                 <article class="st-step">
                     <span class="st-step-index">03</span>
                     <h3>打开管理页</h3>
-                    <p>访问 <code>/store/think-store</code> 查看已安装的 <code>think-store-*</code> 发布包。</p>
+                    <p>访问 <code>/store</code> 查看已安装的 <code>think-store-*</code> 发布包。</p>
                 </article>
                 <article class="st-step">
                     <span class="st-step-index">04</span>
@@ -125,14 +125,14 @@
             <div class="st-api-grid">
                 <article class="st-api-card">
                     <div class="st-api-head"><span class="st-method">GET</span><code>/store/packages</code></div>
-                    <p>查询已安装的 <code>youvision/think-store-*</code> 发布包，返回 <code>total</code> 与 <code>packages</code>。</p>
+                    <p>查询已安装的 <code>youvision/think-store-*</code> 发布包，返回 <code>total</code> 与 <code>packages</code>，每个包含 <code>home</code> 首页路由。</p>
                 </article>
                 <article class="st-api-card">
-                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/think-store</code></div>
+                    <div class="st-api-head"><span class="st-method">GET</span><code>/store</code></div>
                     <p>渲染发布包管理页，使用 think-view 的 <code>Think</code> 驱动与包内 <code>theme/view</code> 模板。</p>
                 </article>
                 <article class="st-api-card">
-                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/think-store/intro</code></div>
+                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/intro</code></div>
                     <p>渲染当前使用说明页，适合作为接入文档或内部说明入口。</p>
                 </article>
                 <article class="st-api-card">
@@ -205,7 +205,7 @@
                     <p>管理页会读取 Composer 已安装信息并展示发布包名称、版本、描述与安装目录。</p>
                 </div>
                 <div class="st-cta-actions">
-                    <a class="st-btn st-btn-primary" href="{$api}/think-store"><i class="layui-icon layui-icon-cart-simple"></i> 返回管理页</a>
+                    <a class="st-btn st-btn-primary" href="{$api}"><i class="layui-icon layui-icon-cart-simple"></i> 返回管理页</a>
                     <a class="st-btn st-btn-ghost" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener">访问 GitHub</a>
                 </div>
             </div>
@@ -217,7 +217,7 @@
     <div class="st-container">
         <div class="st-footer-grid">
             <div>
-                <a class="st-brand st-footer-brand" href="{$api}/think-store">
+                <a class="st-brand st-footer-brand" href="{$api}">
                     <span class="st-brand-mark"><i class="layui-icon layui-icon-cart-simple"></i></span>
                     <span>Store<small>THINK STORE</small></span>
                 </a>
@@ -228,18 +228,18 @@
             <div>
                 <h4>能力</h4>
                 <div class="st-footer-links">
-                    <a href="{$api}/think-store#st-packages">发布包列表</a>
-                    <a href="{$api}/think-store#st-packages">版本信息</a>
-                    <a href="{$api}/think-store#st-packages">安装目录</a>
-                    <a href="{$api}/think-store#st-api">接口说明</a>
+                    <a href="{$api}#st-packages">发布包列表</a>
+                    <a href="{$api}#st-packages">版本信息</a>
+                    <a href="{$api}#st-packages">安装目录</a>
+                    <a href="{$api}#st-api">接口说明</a>
                 </div>
             </div>
             <div>
                 <h4>接口</h4>
                 <div class="st-footer-links">
                     <a href="{$api}/packages">发布包 JSON</a>
-                    <a href="{$api}/think-store">管理页</a>
-                    <a href="{$api}/think-store/intro">使用说明</a>
+                    <a href="{$api}">管理页</a>
+                    <a href="{$api}/intro">使用说明</a>
                     <a href="{$api}/assets/layui/css/layui.css">静态资源</a>
                 </div>
             </div>

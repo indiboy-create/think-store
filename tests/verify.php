@@ -103,7 +103,7 @@ $check(str_contains($indexSource, '{$api}/assets/layui/css/layui.css'), '管理�
 $check(str_contains($indexSource, '{$api}/assets/layui/layui.js'), '管理首页模板应引用 assets 路由的 layui 脚本');
 $check(str_contains($indexSource, '{$api}/assets/js/store.js'), '管理首页模板应引用页面脚本');
 $check(str_contains($indexSource, 'window.STORE_CONFIG'), '管理首页模板应注入接口配置');
-$check(str_contains($indexSource, '{$api}/think-store/intro'), '管理首页模板应链接使用说明路由');
+$check(str_contains($indexSource, '{$api}/intro'), '管理首页模板应链接使用说明路由');
 $check(str_contains($indexSource, '{$version}'), '管理首页模板应使用视图变量输出版本号');
 $check(str_contains($indexSource, 'class="st-hero"'), '管理首页模板应包含 hero 区域');
 $check(!str_contains($indexSource, '/packages/sync'), '管理首页模板不应包含同步接口调用');
@@ -117,12 +117,13 @@ $check(str_contains($scriptSource, "api + '/packages'"), '页面脚本应请求�
 $check(str_contains($scriptSource, 'fetch('), '页面脚本应使用 fetch 读取数据');
 $check(str_contains($scriptSource, 'st-json-toggle'), '页面脚本应支持展开原始 JSON');
 $check(str_contains($scriptSource, 'st-nav-toggle'), '页面脚本应支持移动端导航');
+$check(str_contains($scriptSource, 'row.home'), '页面脚本应渲染发布包首页路由');
 
 $introSource = (string) file_get_contents($packageRoot . '/theme/view/intro.html');
 
 $check(str_contains($introSource, '使用说明'), '使用说明模板应存在');
 $check(str_contains($introSource, '/store/packages'), '使用说明模板应描述查询接口');
-$check(str_contains($introSource, '/store/think-store'), '使用说明模板应描述页面路由');
+$check(str_contains($introSource, '<code>/store</code>'), '使用说明模板应描述页面路由');
 $check(str_contains($introSource, '/store/assets/'), '使用说明模板应描述 assets 路由');
 $check(str_contains($introSource, '{$api}/assets/layui/css/layui.css'), '使用说明模板应引用 assets 路由的 layui 样式');
 $check(str_contains($introSource, '{$api}/assets/js/store.js'), '使用说明模板应引用页面脚本');
@@ -141,8 +142,8 @@ $check(!str_contains($styleSource, 'cdn'), '样式不应依赖 CDN 资源');
 $routeSource = (string) file_get_contents($packageRoot . '/route/store.php');
 
 $check(str_contains($routeSource, "Route::get('packages'"), '路由应注册 GET packages');
-$check(str_contains($routeSource, "Route::get('think-store'"), '路由应注册 GET think-store');
-$check(str_contains($routeSource, "Route::get('think-store/intro'"), '路由应注册 GET think-store/intro');
+$check(str_contains($routeSource, "Route::get(''"), '路由应注册 GET 首页');
+$check(str_contains($routeSource, "Route::get('intro'"), '路由应注册 GET intro');
 $check(str_contains($routeSource, "Route::get('assets/<path>'"), '路由应注册 GET assets/<path>');
 $check(str_contains($routeSource, 'AssetController'), '资源路由应使用 AssetController');
 $check(str_contains($routeSource, "pattern(['path' => '.*'])"), '资源路由应匹配多级路径');
@@ -185,6 +186,7 @@ $check(str_contains($controllerSource, 'function sync') === false, '控制器不
 $storeSource = (string) file_get_contents($packageRoot . '/src/Store.php');
 
 $check(!str_contains($storeSource, 'function sync'), 'Store 不应提供同步方法');
+$check(str_contains($storeSource, 'extra'), 'Store 应从包内 composer.json 的 extra 读取首页路由');
 
 $tmp = sys_get_temp_dir() . '/think-store-' . bin2hex(random_bytes(4));
 mkdir($tmp . '/vendor/composer', 0755, true);
@@ -207,8 +209,14 @@ $makePackage = static function (string $name, array $composer) use ($tmp, $write
     ));
 };
 
-$makePackage('youvision/think-store-example', ['description' => '示例发布包']);
-$makePackage('youvision/think-store-broken', ['description' => '损坏的发布包']);
+$makePackage('youvision/think-store-example', [
+    'description' => '示例发布包',
+    'extra'       => ['store' => ['home' => '/store/example']],
+]);
+$makePackage('youvision/think-store-broken', [
+    'description' => '损坏的发布包',
+    'extra'       => ['store' => ['home' => 'store/broken']],
+]);
 $makePackage('youvision/think-store-api', ['description' => '需要排除的发布包']);
 $makePackage('acme/store-other', ['description' => '无关的 Composer 包']);
 $makePackage('youvision/think-store', ['description' => '管理扩展自身']);
@@ -263,14 +271,20 @@ $example = $byName['youvision/think-store-example'] ?? [];
 
 $check(($example['version'] ?? '') === '1.1.0', '示例包版本应为 1.1.0');
 $check(($example['description'] ?? '') === '示例发布包', '示例包描述应读取自包内 composer.json');
+$check(($example['home'] ?? '') === '/store/example', '示例包首页路由应读取自 extra.store.home');
 $check(
     ($example['path'] ?? '') === $tmp . '/vendor/youvision/think-store-example',
     '示例包安装路径应正确'
 );
 
+$broken = $byName['youvision/think-store-broken'] ?? [];
+
+$check(($broken['home'] ?? '') === '/store/broken', '相对首页路由应自动补前导斜杠');
+
 $empty = $byName['youvision/think-store-empty'] ?? [];
 
 $check(($empty['description'] ?? 'x') === '', '无效 composer.json 的描述应为空字符串');
+$check(($empty['home'] ?? 'x') === '', '无首页配置的包 home 应为空字符串');
 
 $check(method_exists($store, 'sync') === false, 'Store 不应保留 sync 方法');
 $check($store->projectRoot() === $tmp, 'projectRoot 应返回主项目根目录');

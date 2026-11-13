@@ -618,6 +618,19 @@ body.st-page {
   word-break: break-all;
 }
 
+.st-home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  color: var(--st-brand);
+  font-size: 12px;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.st-home-link:hover { text-decoration: underline; }
+
 .st-muted-text { color: #9aabaa; }
 
 .st-side { display: flex; flex-direction: column; }

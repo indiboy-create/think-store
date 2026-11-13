@@ -14,7 +14,7 @@ class Store
 
     protected ?array $composer = null;
 
-    protected array $descriptions = [];
+    protected array $composers = [];
 
     /**
      * @param array       $config      商店配置，通常来自 config/store.php
@@ -62,12 +62,75 @@ class Store
      */
     protected function describe(string $package, array $info): array
     {
+        $path     = (string) ($info['path'] ?? '');
+        $composer = $this->packageComposer($path);
+
         return [
             'package'     => $package,
             'version'     => (string) ($info['version'] ?? ''),
-            'description' => $this->description($package, (string) ($info['path'] ?? '')),
-            'path'        => (string) ($info['path'] ?? ''),
+            'description' => trim((string) ($composer['description'] ?? '')),
+            'home'        => $this->home($composer),
+            'path'        => $path,
         ];
+    }
+
+    /**
+     * 读取发布包自身 composer.json，读取失败时返回空数组。
+     *
+     * @return array<string, mixed>
+     */
+    protected function packageComposer(string $path): array
+    {
+        if ($path === '') {
+            return [];
+        }
+
+        if (isset($this->composers[$path])) {
+            return $this->composers[$path];
+        }
+
+        $file = $path . '/composer.json';
+
+        if (!is_file($file)) {
+            return $this->composers[$path] = [];
+        }
+
+        $json = json_decode((string) file_get_contents($file), true);
+
+        return $this->composers[$path] = is_array($json) ? $json : [];
+    }
+
+    /**
+     * 发布包首页路由，取自包内 composer.json 的 extra.store.home。
+     *
+     * @param array<string, mixed> $composer
+     */
+    protected function home(array $composer): string
+    {
+        $extra = $composer['extra'] ?? [];
+
+        if (!is_array($extra)) {
+            return '';
+        }
+
+        $store = $extra['store'] ?? [];
+        $home  = is_array($store) ? ($store['home'] ?? '') : '';
+
+        if (!is_string($home)) {
+            return '';
+        }
+
+        $home = trim($home);
+
+        if ($home === '') {
+            return '';
+        }
+
+        if (preg_match('#^https?://#i', $home) === 1 || str_starts_with($home, '/')) {
+            return $home;
+        }
+
+        return '/' . $home;
     }
 
     /**
@@ -193,23 +256,6 @@ class Store
         return (bool) preg_match('#^' . $regex . '$#i', $package);
     }
 
-    protected function description(string $package, string $path): string
-    {
-        if (isset($this->descriptions[$package])) {
-            return $this->descriptions[$package];
-        }
-
-        $file = $path . '/composer.json';
-
-        if ($path === '' || !is_file($file)) {
-            return $this->descriptions[$package] = '';
-        }
-
-        $json        = json_decode((string) file_get_contents($file), true);
-        $description = is_array($json) ? (string) ($json['description'] ?? '') : '';
-
-        return $this->descriptions[$package] = trim($description);
-    }
 
     /**
      * @return array<string, mixed>
