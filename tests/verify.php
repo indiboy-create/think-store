@@ -149,7 +149,7 @@ $routeSource = (string) file_get_contents($packageRoot . '/route/store.php');
 
 $check(str_contains($routeSource, "Route::get('think-store/packages'"), '路由应注册 GET think-store/packages');
 $check(str_contains($routeSource, "Route::get('think-store/index'"), '路由应注册 GET think-store/index');
-$check(str_contains($routeSource, "Route::get('think-store/intro'"), '路由应注册 GET think-store/intro');
+
 $check(str_contains($routeSource, "Route::get('assets/<path>'"), '路由应注册 GET assets/<path>');
 $check(str_contains($routeSource, 'AssetController'), '资源路由应使用 AssetController');
 $check(str_contains($routeSource, "pattern(['path' => '.*'])"), '资源路由应匹配多级路径');
@@ -182,8 +182,7 @@ $check(str_contains($serviceSource, 'getRootPath'), '服务应使用主项目根
 $controllerSource = (string) file_get_contents($packageRoot . '/src/StoreController.php');
 
 $check(str_contains($controllerSource, 'function index'), '控制器应提供 index 页面');
-$check(str_contains($controllerSource, 'function intro'), '控制器应提供 intro 兼容入口');
-$check(str_contains($controllerSource, "redirect(\$this->apiPrefix() . '/think-store/index#st-docs')"), '控制器应将旧说明页重定向到文档区');
+
 $check(str_contains($controllerSource, 'function packages'), '控制器应提供 packages 接口');
 $check(str_contains($controllerSource, 'View $view'), '控制器应注入包内渲染器');
 $check(str_contains($controllerSource, '$this->view->render'), '控制器应通过渲染器输出页面');

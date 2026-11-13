@@ -1,16 +1,9 @@
-## ThinkPHP-PanGu - 盘古ThinkPHP开源索引!
-面向 ThinkPHP 的开源工程索引：组件、框架、服务与发布工具，按能力组织，持续整理。
-- 仓库地址：**<https://github.com/indiboy-create/ThinkPHP-PanGu/>**
-- 在线站点：**<https://indiboy-create.github.io/ThinkPHP-PanGu/>**
-
 # youvision/think-store
 
-ThinkPHP 8 商店管理扩展，用于管理主项目中已安装的 `youvision/think-store-*` 发布包（例如 `youvision/think-store-example`）。
+面向 ThinkPHP 8 的商店管理扩展，用于查询主项目中已安装的 `youvision/think-store-*` 发布包，例如 `youvision/think-store-example`。
 
-提供三项核心能力：
-
-- **发布包查询**：列出已安装的 `think-store-*` 发布包及其版本、描述与安装目录。
-- **管理首页**：基于 think-view 渲染的 layui 数据表格页面，查看发布包列表与首页路由，并内置安装、配置与安全文档。
+- **发布包查询**：列出已安装的 `think-store-*` 发布包及其版本、描述、首页路由与安装目录。
+- **管理首页**：基于 think-view 渲染的 layui 数据表格页面，内置安装、配置与安全文档。
 - **包内静态资源**：通过内置 assets 路由直接输出 `theme/assets`，无需发布到 `public`。
 
 ## 环境要求
@@ -39,7 +32,6 @@ php think vendor:publish
 | 方法 | 地址 | 说明 |
 | --- | --- | --- |
 | GET | `/store/think-store/index` | 渲染发布包管理首页（含使用文档） |
-| GET | `/store/think-store/intro` | 302 重定向到首页使用文档区 |
 | GET | `/store/think-store/packages` | 查询已安装的发布包 |
 | GET | `/store/assets/<path>` | 直接输出包内 `theme/assets`，含 layui 与样式 |
 
@@ -51,11 +43,8 @@ php think vendor:publish
 - 静态资源由 `AssetController` 读取 `theme/assets` 后输出，路径经过 `realpath` 校验并拒绝 `..`，避免目录穿越。
 - 资源响应带 `Cache-Control: public, max-age=86400`，字体、CSS、JS、图片等类型会返回对应的 `Content-Type`。
 
-访问地址：
-
 ```text
 /store/think-store/index
-/store/think-store/intro      # 302 重定向到首页文档区
 /store/assets/layui/css/layui.css
 ```
 
@@ -113,6 +102,20 @@ GET /store/think-store/packages
 - 未以 `/` 或 `http(s)://` 开头的相对路径会自动补前导 `/`。
 - 未声明或声明无效的包，`home` 为空字符串。
 
+## 配置
+
+配置文件位于 `config/store.php`，发布后可在主项目中覆盖：
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `route.enabled` | `true` | 是否自动注册页面、查询与资源路由；关闭后由主项目自行注册 |
+| `route.prefix` | `store` | 路由前缀，留空表示不添加前缀 |
+| `route.middleware` | `[]` | 应用到整组路由的中间件，可填写类名或别名 |
+| `prefix` | `youvision/think-store-` | 发布包包名前缀，只有匹配该前缀的包才会被识别 |
+| `exclude` | `[]` | 需要排除的包名，支持 `*`、`?` 通配符 |
+
+`Service` 会自动合并包内默认配置与主项目配置，项目侧配置优先。主项目可通过 `php think vendor:publish` 发布配置文件后修改，也可直接在 `config/store.php` 中覆盖；修改后清除 `runtime` 缓存即可生效。
+
 ## PHP 调用
 
 服务注册后，可通过容器获取 `Store`：
@@ -133,18 +136,6 @@ $packages = $store->packages();
 ```php
 $store = new Store((array) config('store'), app()->getRootPath());
 ```
-
-## 配置 config/store.php
-
-| 配置项 | 默认值 | 说明 |
-| --- | --- | --- |
-| `route.enabled` | `true` | 是否自动注册页面、查询与资源路由；关闭后由主项目自行注册 |
-| `route.prefix` | `store` | 路由前缀，留空表示不添加前缀 |
-| `route.middleware` | `[]` | 应用到整组路由的中间件，可填写类名或别名 |
-| `prefix` | `youvision/think-store-` | 发布包包名前缀，只有匹配该前缀的包才会被识别 |
-| `exclude` | `[]` | 需要排除的包名，支持 `*`、`?` 通配符 |
-
-`Service` 会自动合并包内默认配置与主项目配置，项目侧配置优先。主项目可通过 `php think vendor:publish` 发布配置文件后修改，也可直接在 `config/store.php` 中覆盖；修改后清除 `runtime` 缓存即可生效。
 
 ## 目录结构
 
@@ -168,7 +159,7 @@ think-store/
 │     ├─ css/index.css       # 管理页自定义样式
 │     └─ layui/              # layui 本地资源
 ├─ tests/
-│  └─ verify.php
+│  └─ verify.php             # 独立验证脚本
 ├─ LICENSE
 └─ README.md
 ```
@@ -190,3 +181,7 @@ php tests/verify.php
 ## 许可证
 
 MIT，详见 `LICENSE`。
+
+## 相关项目
+
+ThinkPHP-PanGu 是一个面向 ThinkPHP 的开源工程索引，收录组件、框架、服务与发布工具：<https://github.com/indiboy-create/ThinkPHP-PanGu/>。
