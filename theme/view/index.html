@@ -3,142 +3,259 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Think Store 发布包管理</title>
+<title>发布包管理 · Think Store</title>
+<meta name="description" content="ThinkPHP 8 商店发布包管理：查询已安装的 youvision/think-store-* 扩展。">
 <link rel="stylesheet" href="{$api}/assets/layui/css/layui.css">
 <link rel="stylesheet" href="{$api}/assets/css/index.css">
 </head>
-<body class="store-page">
-<header class="store-header">
-    <div class="layui-container store-header__inner">
-        <a class="store-brand" href="{$api}/think-store">Think Store</a>
-        <ul class="layui-nav store-nav" lay-filter="store-nav">
-            <li class="layui-nav-item layui-this"><a href="{$api}/think-store">发布包管理</a></li>
-            <li class="layui-nav-item"><a href="{$api}/think-store/intro">使用说明</a></li>
-        </ul>
+<body class="st-page">
+<header class="st-header">
+    <div class="st-container st-header-inner">
+        <a class="st-brand" href="#st-top">
+            <span class="st-brand-mark"><i class="layui-icon layui-icon-cart-simple"></i></span>
+            <span>Store<small>THINK STORE</small></span>
+        </a>
+        <nav class="st-nav" id="st-nav">
+            <a class="is-active" href="#st-overview">概览</a>
+            <a href="#st-packages">发布包</a>
+            <a href="#st-api">接口</a>
+            <a href="{$api}/think-store/intro">文档</a>
+        </nav>
+        <span class="st-source"><i class="layui-icon layui-icon-fire"></i> 只读查询</span>
+        <button type="button" class="st-nav-toggle" id="st-nav-toggle" aria-label="打开导航" aria-expanded="false" aria-controls="st-nav">
+            <i class="layui-icon layui-icon-spread-left"></i>
+        </button>
     </div>
 </header>
-<main class="store-main" data-api="{$api}">
-    <div class="layui-container">
-        <section class="store-hero">
-            <p class="store-eyebrow">youvision/think-store</p>
-            <h1 class="store-title">发布包管理：查询已安装扩展</h1>
-            <p class="store-subtitle">查看主项目中已安装的 youvision/think-store-* 发布包及其版本与安装目录。</p>
-            <p class="store-actions">
-                <a class="layui-btn layui-btn-primary" href="{$api}/think-store/intro">查看使用说明</a>
-            </p>
-        </section>
-        <div class="store-toolbar layui-form" lay-filter="store-toolbar">
-            <div class="store-toolbar__summary" id="store-summary">正在加载发布包...</div>
-            <div class="store-toolbar__actions">
-                <button class="layui-btn layui-btn-sm layui-btn-primary" id="refresh" type="button">刷新列表</button>
+
+<main id="st-top" data-api="{$api}">
+    <section class="st-hero" id="st-overview">
+        <div class="st-container st-hero-grid">
+            <div class="st-hero-main">
+                <span class="st-badge"><i class="layui-icon layui-icon-engine"></i> ThinkPHP 8 · Layui 2.13.9 · think-view</span>
+                <p class="st-hero-kicker">发布包管理</p>
+                <h1 class="st-hero-title">已安装扩展</h1>
+                <p class="st-hero-time" id="st-publish">正在读取 vendor/composer/installed.json …</p>
+
+                <div class="st-hero-metric">
+                    <span class="st-hero-count"><span id="st-total">--</span><small>个</small></span>
+                    <div class="st-hero-desc">
+                        <span class="st-hero-icon">📦</span>
+                        <strong id="st-hero-state">发布包</strong>
+                        <p id="st-hero-hint">按 prefix 识别 · 只读</p>
+                    </div>
+                </div>
+
+                <div class="st-hero-tags">
+                    <span class="st-tag" id="st-prefix-tag">youvision/think-store-*</span>
+                    <span class="st-tag is-ghost">GET /packages</span>
+                    <span class="st-tag is-ghost">assets 路由</span>
+                </div>
             </div>
+
+            <aside class="st-hero-side">
+                <div class="st-glass">
+                    <div class="st-glass-head">
+                        <span class="st-eyebrow">接口概览</span>
+                        <span class="st-code">{$api}</span>
+                    </div>
+
+                    <div class="st-glass-fields">
+                        <div class="st-field"><span>查询接口</span><code>GET /packages</code></div>
+                        <div class="st-field"><span>页面路由</span><code>/think-store</code></div>
+                        <div class="st-field"><span>当前版本</span><code>v{$version}</code></div>
+                    </div>
+
+                    <button type="button" class="st-btn st-btn-primary st-btn-block" id="st-refresh">
+                        <i class="layui-icon layui-icon-refresh"></i> 刷新发布包
+                    </button>
+
+                    <p class="st-hint">读取 Composer 已安装包，不写入任何文件。</p>
+
+                    <div class="st-quick">
+                        <a class="st-quick-link" href="{$api}/think-store/intro"><i class="layui-icon layui-icon-read"></i> 使用说明</a>
+                        <a class="st-quick-link" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener"><i class="layui-icon layui-icon-log"></i> GitHub</a>
+                    </div>
+                </div>
+            </aside>
         </div>
-        <div class="store-table-card">
-            <table id="package-table" lay-filter="package-table"></table>
-        </div>
-        <p class="store-api-note">
-            接口前缀：<code id="store-api-base">{$api}</code>
-            · <code>GET /packages</code>
-        </p>
+    </section>
+
+    <div class="st-container st-content">
+        <section class="st-metrics">
+            <article class="st-metric">
+                <span class="st-metric-icon">📦</span>
+                <div>
+                    <span class="st-metric-label">发布包总数</span>
+                    <strong id="st-total-metric">--</strong>
+                </div>
+            </article>
+            <article class="st-metric">
+                <span class="st-metric-icon">🏷️</span>
+                <div>
+                    <span class="st-metric-label">当前版本</span>
+                    <strong>v{$version}</strong>
+                </div>
+            </article>
+            <article class="st-metric">
+                <span class="st-metric-icon">🔖</span>
+                <div>
+                    <span class="st-metric-label">识别前缀</span>
+                    <strong>youvision/think-store-</strong>
+                </div>
+            </article>
+            <article class="st-metric">
+                <span class="st-metric-icon">🗂️</span>
+                <div>
+                    <span class="st-metric-label">资源路由</span>
+                    <strong>/assets/&lt;path&gt;</strong>
+                </div>
+            </article>
+        </section>
+
+        <section class="st-grid-2" id="st-packages">
+            <article class="st-panel">
+                <div class="st-panel-head">
+                    <div>
+                        <span class="st-eyebrow">Packages</span>
+                        <h2>发布包列表</h2>
+                    </div>
+                    <span class="st-panel-tip" id="st-summary">正在加载…</span>
+                </div>
+                <div class="st-table-wrap">
+                    <table id="st-package-table" lay-filter="st-package-table"></table>
+                </div>
+            </article>
+
+            <aside class="st-panel st-side">
+                <div class="st-panel-head">
+                    <div>
+                        <span class="st-eyebrow">Raw JSON</span>
+                        <h2>数据面板</h2>
+                    </div>
+                    <button type="button" class="st-btn st-btn-outline st-btn-sm" id="st-json-toggle">
+                        <i class="layui-icon layui-icon-down"></i> 展开
+                    </button>
+                </div>
+                <p class="st-side-desc">
+                    接口返回 Composer 已安装包信息，前端仅负责展示，便于对照真实结构排查问题。
+                </p>
+                <div class="st-json-wrap" id="st-json-wrap">
+                    <pre class="st-json" id="st-json">{}</pre>
+                </div>
+                <div class="st-side-foot">
+                    <span>GET /packages</span>
+                    <span>记录 <code id="st-json-count">0</code></span>
+                </div>
+            </aside>
+        </section>
+
+        <section class="st-section" id="st-api">
+            <div class="st-section-head">
+                <div>
+                    <span class="st-eyebrow">Endpoints</span>
+                    <h2>接口说明</h2>
+                    <p>路由由服务提供者在 boot 阶段注册，宿主项目无需复制路由文件。</p>
+                </div>
+            </div>
+
+            <div class="st-api-grid">
+                <article class="st-api-card">
+                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/packages</code></div>
+                    <p>返回 <code>total</code> 与 <code>packages</code>，包含包名、版本、描述与安装目录。</p>
+                </article>
+                <article class="st-api-card">
+                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/think-store</code></div>
+                    <p>由 think-view 渲染发布包管理页，模板位于包内 <code>theme/view</code>。</p>
+                </article>
+                <article class="st-api-card">
+                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/think-store/intro</code></div>
+                    <p>渲染使用说明页，包含安装、配置与接口说明。</p>
+                </article>
+                <article class="st-api-card">
+                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/assets/&lt;path&gt;</code></div>
+                    <p>直接输出 <code>theme/assets</code>；路径经过 realpath 校验，拒绝目录穿越。</p>
+                </article>
+            </div>
+
+            <div class="st-note">
+                <i class="layui-icon layui-icon-tips"></i>
+                <span>静态资源由 <code>/store/assets/&lt;path&gt;</code> 路由直接输出，无需发布到 public；路由前缀可在 <code>config/store.php</code> 中修改。</span>
+            </div>
+        </section>
+
+        <section class="st-section" id="st-start">
+            <div class="st-cta">
+                <div class="st-cta-text">
+                    <span class="st-eyebrow">Get started</span>
+                    <h2>从 Composer 开始管理发布包</h2>
+                    <p>安装 <code>youvision/think-store</code> 后即可查询所有 <code>think-store-*</code> 扩展；路由、模板与静态资源均可按项目需要替换。</p>
+                </div>
+                <div class="st-cta-actions">
+                    <a class="st-btn st-btn-primary" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener">
+                        <i class="layui-icon layui-icon-log"></i> 访问 GitHub
+                    </a>
+                    <a class="st-btn st-btn-ghost" href="{$api}/think-store/intro">查看使用说明</a>
+                </div>
+            </div>
+        </section>
     </div>
 </main>
-<footer class="store-footer">
-    <div class="layui-container store-footer__inner">
-        <span>youvision/think-store <span class="store-version">v{$version}</span></span>
-        <span>MIT License</span>
+
+<footer class="st-footer">
+    <div class="st-container">
+        <div class="st-footer-grid">
+            <div>
+                <a class="st-brand st-footer-brand" href="#st-top">
+                    <span class="st-brand-mark"><i class="layui-icon layui-icon-cart-simple"></i></span>
+                    <span>Store<small>THINK STORE</small></span>
+                </a>
+                <p class="st-footer-desc">
+                    youvision/think-store：面向 ThinkPHP 8 的商店管理扩展，查询已安装的 think-store-* 发布包。
+                </p>
+            </div>
+            <div>
+                <h4>能力</h4>
+                <div class="st-footer-links">
+                    <a href="#st-packages">发布包列表</a>
+                    <a href="#st-packages">版本信息</a>
+                    <a href="#st-packages">安装目录</a>
+                    <a href="#st-api">接口说明</a>
+                </div>
+            </div>
+            <div>
+                <h4>接口</h4>
+                <div class="st-footer-links">
+                    <a href="{$api}/packages">发布包 JSON</a>
+                    <a href="{$api}/think-store">管理页</a>
+                    <a href="{$api}/think-store/intro">使用说明</a>
+                    <a href="{$api}/assets/layui/css/layui.css">静态资源</a>
+                </div>
+            </div>
+            <div>
+                <h4>资源</h4>
+                <div class="st-footer-links">
+                    <a href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener">GitHub 仓库</a>
+                    <a href="https://github.com/indiboy-create/think-store#readme" target="_blank" rel="noopener">使用文档</a>
+                    <a href="https://layui.dev/" target="_blank" rel="noopener">Layui 文档</a>
+                    <a href="https://www.thinkphp.cn/" target="_blank" rel="noopener">ThinkPHP 官网</a>
+                </div>
+            </div>
+        </div>
+        <div class="st-footer-bottom">
+            <span>© 2026 youvision/think-store</span>
+            <span>Built with ThinkPHP 8 · Layui 2.13.9 <span class="st-version">v{$version}</span></span>
+        </div>
     </div>
 </footer>
-<script src="{$api}/assets/layui/layui.js"></script>
+
 <script>
-layui.use(['table', 'element'], function () {
-    var table = layui.table;
-    var main = document.querySelector('.store-main');
-    var api = ((main && main.getAttribute('data-api')) || '').replace(/\/+$/, '');
-    var summary = document.getElementById('store-summary');
-
-    document.getElementById('store-api-base').textContent = api || '/';
-
-    var escapeHtml = function (value) {
-        return String(value === null || value === undefined ? '' : value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    };
-
-    table.render({
-        elem: '#package-table',
-        id: 'package-table',
-        url: api + '/packages',
-        method: 'get',
-        page: false,
-        even: true,
-        text: {
-            none: '暂无已安装的 think-store 发布包'
-        },
-        parseData: function (res) {
-            if (res && Array.isArray(res.packages)) {
-                return {
-                    code: 0,
-                    msg: '',
-                    count: res.total || res.packages.length,
-                    data: res.packages
-                };
-            }
-
-            return {
-                code: 1,
-                msg: (res && res.message) || '接口返回格式无效',
-                count: 0,
-                data: []
-            };
-        },
-        cols: [[
-            {
-                field: 'package',
-                title: '发布包',
-                minWidth: 320,
-                templet: function (d) {
-                    var description = d.description
-                        ? '<span class="store-package__desc">' + escapeHtml(d.description) + '</span>'
-                        : '';
-
-                    return '<span class="store-package__name">' + escapeHtml(d.package) + '</span>' + description;
-                }
-            },
-            {
-                field: 'version',
-                title: '版本',
-                width: 120,
-                align: 'center',
-                templet: function (d) {
-                    return d.version ? escapeHtml(d.version) : '<span class="store-text-muted">—</span>';
-                }
-            },
-            {
-                field: 'path',
-                title: '安装目录',
-                minWidth: 320,
-                templet: function (d) {
-                    return d.path
-                        ? '<code class="store-code">' + escapeHtml(d.path) + '</code>'
-                        : '<span class="store-text-muted">—</span>';
-                }
-            }
-        ]],
-        done: function (res) {
-            summary.innerHTML = '共 <strong>' + (res.data || []).length + '</strong> 个发布包';
-        },
-        error: function () {
-            summary.textContent = '接口请求失败，请确认路由前缀或服务状态';
-        }
-    });
-
-    document.getElementById('refresh').addEventListener('click', function () {
-        table.reload('package-table');
-    });
-});
+window.STORE_CONFIG = {
+    api: '{$api}',
+    version: '{$version}'
+};
 </script>
+<script src="{$api}/assets/layui/layui.js"></script>
+<script src="{$api}/assets/js/store.js"></script>
 </body>
 </html>
