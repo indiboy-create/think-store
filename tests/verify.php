@@ -64,6 +64,8 @@ $config = require $configFile;
 $check(($config['route']['enabled'] ?? null) === true, '默认应启用内置路由');
 $check(($config['route']['prefix'] ?? '') === 'store', '默认路由前缀应为 store');
 $check(($config['route']['middleware'] ?? null) === [], '默认路由中间件应为空数组');
+$check(($config['view'] ?? null) === '', '默认视图目录应为空字符串');
+$check(($config['assets'] ?? null) === 'assets', '默认静态资源地址应为 assets');
 $check(($config['prefix'] ?? '') === 'youvision/think-store-', '默认包前缀应为 youvision/think-store-');
 $check(($config['exclude'] ?? null) === [], '默认排除列表应为空数组');
 
@@ -105,9 +107,9 @@ $check(str_contains($indexSource, 'st-table-toolbar'), '管理首页表格应包
 $check(!str_contains($indexSource, 'st-metrics'), '管理首页不应包含四宫格指标');
 $check(!str_contains($indexSource, 'st-json-wrap'), '管理首页不应包含数据看板');
 $check(str_contains($indexSource, 'data-api="{$api}"'), '管理首页模板应使用视图变量声明接口前缀');
-$check(str_contains($indexSource, '{$api}/assets/layui/css/layui.css'), '管理首页模板应引用 assets 路由的 layui 样式');
-$check(str_contains($indexSource, '{$api}/assets/layui/layui.js'), '管理首页模板应引用 assets 路由的 layui 脚本');
-$check(str_contains($indexSource, '{$api}/assets/js/store.js'), '管理首页模板应引用页面脚本');
+$check(str_contains($indexSource, '{$assets}/layui/css/layui.css'), '管理首页模板应引用 assets 配置的 layui 样式');
+$check(str_contains($indexSource, '{$assets}/layui/layui.js'), '管理首页模板应引用 assets 配置的 layui 脚本');
+$check(str_contains($indexSource, '{$assets}/js/store.js'), '管理首页模板应引用页面脚本');
 $check(str_contains($indexSource, 'window.STORE_CONFIG'), '管理首页模板应注入接口配置');
 $check(str_contains($indexSource, 'href="#st-docs"'), '管理首页模板应提供文档锚点链接');
 $check(str_contains($indexSource, '{$version}'), '管理首页模板应使用视图变量输出版本号');
@@ -186,6 +188,7 @@ $check(str_contains($controllerSource, 'function index'), '控制器应提供 in
 $check(str_contains($controllerSource, 'function packages'), '控制器应提供 packages 接口');
 $check(str_contains($controllerSource, 'View $view'), '控制器应注入包内渲染器');
 $check(str_contains($controllerSource, '$this->view->render'), '控制器应通过渲染器输出页面');
+$check(str_contains($controllerSource, 'store.assets'), '控制器应读取 store.assets 配置');
 $check(str_contains($controllerSource, 'InstalledVersions'), '控制器应从 Composer 运行时读取版本');
 $check(str_contains($controllerSource, "'dev'"), '控制器应提供开发版本回退');
 $check(str_contains($controllerSource, 'function sync') === false, '控制器不应提供 sync 接口');
@@ -199,6 +202,9 @@ $check(str_contains($viewSource, 'cache_path'), '渲染器应配置模板缓存�
 $check(str_contains($viewSource, 'getRuntimePath'), '渲染器应使用主项目运行时目录');
 $check(str_contains($viewSource, 'cache_prefix'), '渲染器应使用独立的模板缓存前缀');
 $check(str_contains($viewSource, 'ob_start'), '渲染器应捕获模板输出');
+$check(str_contains($viewSource, 'resolvePath'), '渲染器应解析 view 配置');
+$check(str_contains($viewSource, "get('store.view'"), '渲染器应读取 store.view 配置');
+$check(str_contains($viewSource, 'getRootPath'), '渲染器应按项目根目录解析相对视图路径');
 $check(str_contains($viewSource, 'templateFile'), '渲染器应解析完整模板路径');
 $check(str_contains($viewSource, 'PATHINFO_EXTENSION'), '渲染器应补全模板后缀');
 

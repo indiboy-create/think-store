@@ -39,6 +39,7 @@ class StoreController
     {
         return $this->view->render($template, [
             'api'     => $this->apiPrefix(),
+            'assets'  => $this->assetsPrefix(),
             'version' => $this->version(),
         ]);
     }
@@ -48,6 +49,26 @@ class StoreController
         $prefix = trim((string) config('store.route.prefix', 'store'), '/');
 
         return $prefix === '' ? '' : '/' . $prefix;
+    }
+
+    /**
+     * 包内静态资源地址。
+     *
+     * assets 为相对路径时拼在路由前缀后；以 / 开头时视为外部托管的绝对地址。
+     */
+    protected function assetsPrefix(): string
+    {
+        $assets = trim((string) config('store.assets', 'assets'));
+
+        if ($assets === '') {
+            $assets = 'assets';
+        }
+
+        if (str_starts_with($assets, '/')) {
+            return rtrim($assets, '/');
+        }
+
+        return $this->apiPrefix() . '/' . trim($assets, '/');
     }
 
     protected function version(): string

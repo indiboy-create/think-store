@@ -33,14 +33,15 @@ php think vendor:publish
 | --- | --- | --- |
 | GET | `/store/think-store/index` | 渲染发布包管理首页（含使用文档） |
 | GET | `/store/think-store/packages` | 查询已安装的发布包 |
-| GET | `/store/assets/<path>` | 直接输出包内 `theme/assets`，含 layui 与样式 |
+| GET | `/store/assets/<path>` | 直接输出包内 `theme/assets`，路径前缀由 `assets` 配置控制 |
 
 路由前缀由 `config/store.php` 的 `route.prefix` 控制，默认 `store`；设为空字符串时地址变为 `/think-store/index`、`/think-store/packages` 等。
 
 ## 页面与静态资源
 
-- 模板位于包内 `theme/view`，由包内 `View` 渲染器通过 think-view 的 `Think` 驱动渲染，不需要复制到主项目。
+- 模板默认位于包内 `theme/view`，由包内 `View` 渲染器通过 think-view 的 `Think` 驱动渲染，不需要复制到主项目；将 `view` 配置为 `view/think-store`（相对项目根目录，`view` 与 `app` 同级）后，模板改为读取该目录，便于在主项目中覆盖。
 - 静态资源由 `AssetController` 读取 `theme/assets` 后输出，路径经过 `realpath` 校验并拒绝 `..`，避免目录穿越。
+- 页面引用的资源地址由 `assets` 配置生成：相对值拼在 `route.prefix` 后，以 `/` 开头时视为外部托管的绝对地址。
 - 资源响应带 `Cache-Control: public, max-age=86400`，字体、CSS、JS、图片等类型会返回对应的 `Content-Type`。
 
 ```text
@@ -48,7 +49,7 @@ php think vendor:publish
 /store/assets/layui/css/layui.css
 ```
 
-模板内的接口地址与资源地址会跟随 `route.prefix` 自动变化。
+模板内的接口地址与资源地址会跟随 `route.prefix` 与 `assets` 自动变化。
 
 ## 查询接口
 
@@ -111,6 +112,8 @@ GET /store/think-store/packages
 | `route.enabled` | `true` | 是否自动注册页面、查询与资源路由；关闭后由主项目自行注册 |
 | `route.prefix` | `store` | 路由前缀，留空表示不添加前缀 |
 | `route.middleware` | `[]` | 应用到整组路由的中间件，可填写类名或别名 |
+| `view` | 空字符串 | 模板目录；留空使用包内 `theme/view`，填写时该值即目录，相对路径从项目根目录算起，例如 `view/think-store` |
+| `assets` | `assets` | 静态资源地址前缀；相对值拼在 `route.prefix` 后，以 `/` 开头时视为外部托管的绝对地址 |
 | `prefix` | `youvision/think-store-` | 发布包包名前缀，只有匹配该前缀的包才会被识别 |
 | `exclude` | `[]` | 需要排除的包名，支持 `*`、`?` 通配符 |
 

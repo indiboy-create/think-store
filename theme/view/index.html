@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>发布包管理 · Think Store</title>
 <meta name="description" content="ThinkPHP 8 商店管理扩展：查询主项目中已安装的 youvision/think-store-* 发布包，并查看安装、配置与安全文档。">
-<link rel="stylesheet" href="{$api}/assets/layui/css/layui.css">
-<link rel="stylesheet" href="{$api}/assets/css/index.css">
+<link rel="stylesheet" href="{$assets}/layui/css/layui.css">
+<link rel="stylesheet" href="{$assets}/css/index.css">
 </head>
 <body class="st-page">
 <header class="st-header">
@@ -130,7 +130,7 @@
                     <p>由 think-view 渲染管理页，页面同时包含 layui 数据表格与内置使用文档。</p>
                 </article>
                 <article class="st-api-card">
-                    <div class="st-api-head"><span class="st-method">GET</span><code>/store/assets/&lt;path&gt;</code></div>
+                    <div class="st-api-head"><span class="st-method">GET</span><code>{$assets}/&lt;path&gt;</code></div>
                     <p>直接输出 <code>theme/assets</code>；路径经过 <code>realpath</code> 校验并拒绝目录穿越，响应带 1 天缓存。</p>
                 </article>
             </div>
@@ -174,7 +174,7 @@
                         <article class="st-step">
                             <span class="st-step-index">04</span>
                             <h3>静态资源</h3>
-                            <p>layui 与样式由 <code>/store/assets/&lt;path&gt;</code> 直接输出，带 <code>Cache-Control: public, max-age=86400</code>，无需发布到 <code>public</code>。</p>
+                            <p>layui 与样式由 <code>{$assets}/&lt;path&gt;</code> 直接输出，带 <code>Cache-Control: public, max-age=86400</code>，无需发布到 <code>public</code>。</p>
                         </article>
                     </div>
                 </article>
@@ -275,7 +275,7 @@
                     <a href="{$api}/think-store/packages">发布包 JSON</a>
                     <a href="{$api}/think-store/index">管理页</a>
                     <a href="#st-docs">使用文档</a>
-                    <a href="{$api}/assets/layui/css/layui.css">静态资源</a>
+                    <a href="{$assets}/layui/css/layui.css">静态资源</a>
                 </div>
             </div>
             <div>
@@ -301,7 +301,7 @@ window.STORE_CONFIG = {
     version: '{$version}'
 };
 </script>
-<script src="{$api}/assets/layui/layui.js"></script>
-<script src="{$api}/assets/js/store.js"></script>
+<script src="{$assets}/layui/layui.js"></script>
+<script src="{$assets}/js/store.js"></script>
 </body>
 </html>
