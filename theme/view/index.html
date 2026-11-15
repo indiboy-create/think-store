@@ -10,18 +10,20 @@
 </head>
 <body class="st-page">
 <header class="st-header">
-    <div class="st-container st-header-inner">
+    <div class="layui-container st-header-inner">
         <a class="st-brand" href="#st-top">
             <span class="st-brand-mark"><i class="layui-icon layui-icon-cart-simple"></i></span>
             <span>Store<small>THINK STORE</small></span>
         </a>
-        <nav class="st-nav" id="st-nav">
-            <a class="is-active" href="#st-overview">概览</a>
-            <a href="#st-packages">发布包</a>
-            <a href="#st-api">接口</a>
-            <a href="#st-docs">文档</a>
-        </nav>
-        <span class="st-source"><i class="layui-icon layui-icon-fire"></i> 只读查询</span>
+        <ul class="layui-nav st-nav" id="st-nav" lay-filter="st-nav">
+            <li class="layui-nav-item layui-this"><a href="#st-overview">概览</a></li>
+            <li class="layui-nav-item"><a href="#st-packages">发布包</a></li>
+            <li class="layui-nav-item"><a href="#st-api">接口</a></li>
+            <li class="layui-nav-item"><a href="#st-docs">文档</a></li>
+        </ul>
+        <a class="st-github-link" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener">
+            <i class="layui-icon layui-icon-github"></i><span>GitHub</span>
+        </a>
         <button type="button" class="st-nav-toggle" id="st-nav-toggle" aria-label="打开导航" aria-expanded="false" aria-controls="st-nav">
             <i class="layui-icon layui-icon-spread-left"></i>
         </button>
@@ -30,58 +32,40 @@
 
 <main id="st-top" data-api="{$api}">
     <section class="st-hero" id="st-overview">
-        <div class="st-container st-hero-grid">
+        <div class="layui-container st-hero-grid">
             <div class="st-hero-main">
                 <span class="st-badge"><i class="layui-icon layui-icon-engine"></i> ThinkPHP 8 · Layui 2.13.9 · think-view</span>
                 <p class="st-hero-kicker">发布包管理</p>
-                <h1 class="st-hero-title">已安装发布包</h1>
+                <h1 class="st-hero-title"><em>已安装发布包</em></h1>
                 <p class="st-hero-time" id="st-publish">正在读取 vendor/composer/installed.json …</p>
-
-                <div class="st-hero-metric">
-                    <span class="st-hero-count"><span id="st-total">--</span><small>个</small></span>
-                    <div class="st-hero-desc">
-                        <span class="st-hero-icon">📦</span>
-                        <strong id="st-hero-state">发布包</strong>
-                        <p id="st-hero-hint">按 prefix 识别 · 只读查询</p>
-                    </div>
-                </div>
+                <p class="st-hero-hint" id="st-hero-hint">按 prefix 识别 · 只读查询</p>
 
                 <div class="st-hero-tags">
                     <span class="st-tag" id="st-prefix-tag">youvision/think-store-*</span>
                     <span class="st-tag is-ghost">GET /store/think-store/packages</span>
+                    <span class="st-tag is-ghost">只读查询</span>
                     <span class="st-tag is-ghost">内置使用文档</span>
+                </div>
+
+                <div class="st-hero-actions">
+                    <button type="button" class="st-btn st-btn-primary" id="st-refresh">
+                        <i class="layui-icon layui-icon-refresh"></i> 刷新发布包
+                    </button>
+                    <a class="st-btn st-btn-ghost" href="#st-docs"><i class="layui-icon layui-icon-read"></i> 使用文档</a>
+                    <a class="st-btn st-btn-ghost" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener"><i class="layui-icon layui-icon-log"></i> GitHub</a>
                 </div>
             </div>
 
-            <aside class="st-hero-side">
-                <div class="st-glass">
-                    <div class="st-glass-head">
-                        <span class="st-eyebrow">接口概览</span>
-                        <span class="st-code">{$api}</span>
-                    </div>
-
-                    <div class="st-glass-fields">
-                        <div class="st-field"><span>查询接口</span><code>GET /store/think-store/packages</code></div>
-                        <div class="st-field"><span>管理页</span><code>/store/think-store/index</code></div>
-                        <div class="st-field"><span>当前版本</span><code>{$version}</code></div>
-                    </div>
-
-                    <button type="button" class="st-btn st-btn-primary st-btn-block" id="st-refresh">
-                        <i class="layui-icon layui-icon-refresh"></i> 刷新发布包
-                    </button>
-
-                    <p class="st-hint">只读取 <code>vendor/composer/installed.json</code>，不写入任何文件。</p>
-
-                    <div class="st-quick">
-                        <a class="st-quick-link" href="#st-docs"><i class="layui-icon layui-icon-read"></i> 使用文档</a>
-                        <a class="st-quick-link" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener"><i class="layui-icon layui-icon-log"></i> GitHub</a>
-                    </div>
-                </div>
-            </aside>
+            <ul class="st-hero-stats">
+                <li><strong id="st-total">--</strong><span>个已安装包</span></li>
+                <li><strong>1</strong><span>个查询接口</span></li>
+                <li><strong>4</strong><span>个页面区块</span></li>
+                <li><strong>{$version}</strong><span>当前版本</span></li>
+            </ul>
         </div>
     </section>
 
-    <div class="st-container st-content">
+    <div class="layui-container st-content">
         <section class="st-section" id="st-packages" style="padding-top: 8px;">
             <div class="st-section-head">
                 <div>
@@ -229,27 +213,25 @@
                 </article>
             </div>
         </section>
-
-        <section class="st-section" id="st-start">
-            <div class="st-cta">
-                <div class="st-cta-text">
-                    <span class="st-eyebrow">Get started</span>
-                    <h2>从 Composer 开始管理发布包</h2>
-                    <p>安装 <code>youvision/think-store</code> 后即可查询所有 <code>think-store-*</code> 扩展；路由、模板与静态资源均由包内提供，也可按项目需要替换。</p>
-                </div>
-                <div class="st-cta-actions">
-                    <a class="st-btn st-btn-primary" href="https://github.com/indiboy-create/think-store" target="_blank" rel="noopener">
-                        <i class="layui-icon layui-icon-log"></i> 访问 GitHub
-                    </a>
-                    <a class="st-btn st-btn-ghost" href="#st-docs">查看使用文档</a>
-                </div>
-            </div>
-        </section>
     </div>
 </main>
 
+<div class="layui-container">
+    <section class="store-cta">
+        <div class="store-cta__text">
+            <span class="store-eyebrow">Ecosystem</span>
+            <h2 class="store-cta__title">从 ThinkPHP-PanGu 开始，按需组合</h2>
+            <p class="store-cta__desc">所有组件均以 Composer 包形式发布，仓库、README 与 Issue 都在 GitHub 上。遇到问题或想补充能力，可以直接提 Issue。</p>
+        </div>
+        <div class="store-cta__actions">
+            <a class="layui-btn layui-btn-normal" href="https://indiboy-create.github.io/ThinkPHP-PanGu/" target="_blank" rel="noopener"><i class="layui-icon layui-icon-github"></i> GitHub</a>
+            <a class="layui-btn layui-btn-primary" href="https://indiboy-create.github.io/ThinkPHP-PanGu/packages.html" target="_blank" rel="noopener">挑一个组件</a>
+        </div>
+    </section>
+</div>
+
 <footer class="st-footer">
-    <div class="st-container">
+    <div class="layui-container">
         <div class="st-footer-grid">
             <div>
                 <a class="st-brand st-footer-brand" href="#st-top">
@@ -290,7 +272,7 @@
         </div>
         <div class="st-footer-bottom">
             <span>© 2026 youvision/think-store</span>
-            <span>Built with ThinkPHP 8 · Layui 2.13.9 <span class="st-version">{$version}</span></span>
+            <span>Built with ThinkPHP 8 · Layui 2.13.9</span>
         </div>
     </div>
 </footer>

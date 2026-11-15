@@ -270,10 +270,18 @@
         }
 
         links.forEach(function (item) {
-          item.classList.remove('is-active');
+          var parent = item.closest('.layui-nav-item');
+
+          if (parent) {
+            parent.classList.remove('layui-this');
+          }
         });
 
-        this.classList.add('is-active');
+        var current = this.closest('.layui-nav-item');
+
+        if (current) {
+          current.classList.add('layui-this');
+        }
       });
     });
   }

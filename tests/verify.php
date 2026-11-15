@@ -127,10 +127,13 @@ $check(str_contains($scriptSource, 'sort: true'), '页面脚本应支持列排�
 $check(str_contains($scriptSource, "api + '/think-store/packages'"), '页面脚本应请求查询接口');
 $check(str_contains($scriptSource, 'fetch('), '页面脚本应使用 fetch 读取数据');
 $check(!str_contains($scriptSource, 'st-json-toggle'), '页面脚本不应保留数据看板交互');
-$check(str_contains($scriptSource, 'st-nav-toggle'), '页面脚本应支持移动端导航');
+$check(str_contains($scriptSource, "closest('.layui-nav-item')"), '页面脚本应切换 layui 导航高亮');
+$check(str_contains($scriptSource, 'st-nav-toggle'), '页面脚本应支持移动端导航折叠');
 $check(str_contains($scriptSource, 'row.home'), '页面脚本应渲染发布包首页路由');
 $check(str_contains($scriptSource, 'st-btn-visit'), '访问按钮应使用独立配色');
 
+$check(str_contains($indexSource, 'class="layui-nav st-nav"'), '管理首页顶部应使用 layui 导航结构');
+$check(str_contains($indexSource, 'class="st-github-link"'), '管理首页顶部应提供 GitHub 入口');
 $check(str_contains($indexSource, 'id="st-docs"'), '管理首页应包含使用文档区');
 $check(!str_contains($indexSource, 'st-doc-nav'), '管理首页文档不应包含目录导航');
 $check(str_contains($indexSource, '安装与部署'), '管理首页文档应包含安装说明');
@@ -143,7 +146,7 @@ $styleSource = (string) file_get_contents($packageRoot . '/theme/assets/css/inde
 
 $check(str_contains($styleSource, '--st-brand'), '样式应定义商店主题变量');
 $check(str_contains($styleSource, '.st-hero'), '样式应包含 hero 区域');
-$check(str_contains($styleSource, '.st-nav-toggle'), '样式应包含移动端导航');
+$check(str_contains($styleSource, '.st-github-link'), '样式应包含顶部 GitHub 入口');
 $check(str_contains($styleSource, '@media (max-width: 820px)'), '样式应包含响应式断点');
 $check(!str_contains($styleSource, 'cdn'), '样式不应依赖 CDN 资源');
 
